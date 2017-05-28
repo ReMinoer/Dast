@@ -1,0 +1,130 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Dast
+{
+    public interface IDocumentNode
+    {
+        string Accept(IDocumentVisitor visitor);
+        IEnumerable<IDocumentNode> Children { get; }
+    }
+
+    public interface IDocumentNode<out TChild> : IDocumentNode
+        where TChild : IDocumentNode
+    {
+        new IEnumerable<TChild> Children { get; }
+    }
+
+    public abstract class ParentDocumentNodeBase<TChild> : IDocumentNode<TChild>
+        where TChild : IDocumentNode
+    {
+        private readonly IEnumerable<TChild> _readOnlyChildren;
+        public List<TChild> Children { get; } = new List<TChild>();
+        IEnumerable<TChild> IDocumentNode<TChild>.Children => _readOnlyChildren;
+        IEnumerable<IDocumentNode> IDocumentNode.Children => _readOnlyChildren.Cast<IDocumentNode>();
+
+        protected ParentDocumentNodeBase()
+        {
+            _readOnlyChildren = Children.AsReadOnly();
+        }
+
+        public abstract string Accept(IDocumentVisitor visitor);
+    }
+
+    public class DocumentNode : ParentDocumentNodeBase<DocumentNode.IChild>
+    {
+        public List<LineNode> MainTitles { get; } = new List<LineNode>();
+
+        public interface IChild : IDocumentNode { }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitDocument(this);
+    }
+
+    public class ParagraphNode : ParentDocumentNodeBase<ParagraphNode.IChild>, DocumentNode.IChild
+    {
+        public string Class { get; set; }
+
+        public interface IChild : IDocumentNode { }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitParagraph(this);
+    }
+
+    public class TitleNode : ParentDocumentNodeBase<TitleNode.IChild>, DocumentNode.IChild
+    {
+        public int Level { get; set; }
+
+        public interface IChild : IDocumentNode { }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitTitle(this);
+    }
+
+    public class ListNode : ParentDocumentNodeBase<ListNode.IChild>, ParagraphNode.IChild, TitleNode.IChild, ListItemNode.IChild
+    {
+        public bool Ordered { get; set; }
+
+        public interface IChild : IDocumentNode { }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitList(this);
+    }
+
+    public class ListItemNode : ListNode.IChild
+    {
+        public LineNode Line { get; set; }
+        public ListNode Sublist { get; set; }
+
+        public IEnumerable<IDocumentNode> Children
+        {
+            get
+            {
+                yield return Line;
+                yield return Sublist;
+            }
+        }
+
+        public interface IChild : IDocumentNode { }
+        public string Accept(IDocumentVisitor visitor) => visitor.VisitListItem(this);
+    }
+
+    public class LineNode : ParentDocumentNodeBase<LineNode.IChild>, ParagraphNode.IChild, TitleNode.IChild, ListItemNode.IChild
+    {
+        public interface IChild : IDocumentNode { }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitLine(this);
+    }
+
+    public class BoldNode : ParentDocumentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitBold(this);
+    }
+
+    public class ItalicNode : ParentDocumentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitItalic(this);
+    }
+
+    public class MarkNode : ParentDocumentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitMark(this);
+    }
+
+    public class ObsoleteNode : ParentDocumentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitObsolete(this);
+    }
+
+    public class EmphasisNode : ParentDocumentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        public string Class { get; set; }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitEmphasis(this);
+    }
+
+    public class TextNode : LineNode.IChild
+    {
+        public string Content { get; set; }
+        public IEnumerable<IDocumentNode> Children { get { yield break; } }
+        public string Accept(IDocumentVisitor visitor) => visitor.VisitText(this);
+    }
+
+    public class CommentNode : DocumentNode.IChild, ParagraphNode.IChild, LineNode.IChild
+    {
+        public bool Inline { get; set; }
+        public string Content { get; set; }
+        public IEnumerable<IDocumentNode> Children { get { yield break; } }
+        public string Accept(IDocumentVisitor visitor) => visitor.VisitComment(this);
+    }
+}
