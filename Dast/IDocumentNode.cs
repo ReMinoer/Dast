@@ -125,6 +125,20 @@ namespace Dast
         public override string Accept(IDocumentVisitor visitor) => visitor.VisitText(this);
     }
 
+    public class MediaNode : LeafNodeBase, DocumentNode.IChild
+    {
+        public string Extension { get; set; }
+        public string Content { get; set; }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitMedia(this);
+    }
+
+    public class MediaInlineNode : LeafNodeBase, DocumentNode.IChild, LineNode.IChild
+    {
+        public string Extension { get; set; }
+        public string Content { get; set; }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitMediaInline(this);
+    }
+
     public class CommentNode : LeafNodeBase, DocumentNode.IChild, ParagraphNode.IChild, LineNode.IChild
     {
         public bool Inline { get; set; }

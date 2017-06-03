@@ -23,6 +23,8 @@ namespace Dast.Converters.Base
         public abstract string VisitObsolete(ObsoleteNode node);
         public abstract string VisitEmphasis(EmphasisNode node);
         public abstract string VisitText(TextNode node);
+        public abstract string VisitMedia(MediaNode node);
+        public abstract string VisitMediaInline(MediaInlineNode node);
         public abstract string VisitComment(CommentNode node);
     }
 }

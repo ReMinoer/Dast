@@ -14,6 +14,8 @@ namespace Dast
         string VisitObsolete(ObsoleteNode node);
         string VisitEmphasis(EmphasisNode node);
         string VisitText(TextNode node);
+        string VisitMedia(MediaNode node);
+        string VisitMediaInline(MediaInlineNode node);
         string VisitComment(CommentNode node);
     }
 }

@@ -100,6 +100,16 @@ namespace Dast.Converters
             return textNode.Content;
         }
 
+        public override string VisitMedia(MediaNode node)
+        {
+            return $"<< .{node.Extension} >>" + Environment.NewLine + node.Content + Environment.NewLine + "<...>";
+        }
+
+        public override string VisitMediaInline(MediaInlineNode node)
+        {
+            return (node.Extension != null ? $"< .{node.Extension} >" : "") + "{ " + node.Content + " }";
+        }
+
         public override string VisitComment(CommentNode node)
         {
             return "~~"

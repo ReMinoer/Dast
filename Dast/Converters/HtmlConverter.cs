@@ -80,6 +80,16 @@ namespace Dast.Converters
             return textNode.Content;
         }
 
+        public override string VisitMedia(MediaNode node)
+        {
+            return "<pre>" + node.Content + "</pre>";
+        }
+
+        public override string VisitMediaInline(MediaInlineNode node)
+        {
+            return "<code>" + node.Content + "</code>";
+        }
+
         public override string VisitComment(CommentNode node)
         {
             return "<!--"
