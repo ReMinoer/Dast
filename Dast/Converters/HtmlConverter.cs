@@ -2,26 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dast.Converters.Base;
+using Dast.Converters.Media.Html;
 using Dast.Converters.Utils;
 
 namespace Dast.Converters
 {
     public class HtmlConverter : DashVisitorConverterBase
     {
-        public override IEnumerable<string> FileExtensions
+        private readonly HashSet<IHtmlMediaConverter> _usedMediaConverters = new HashSet<IHtmlMediaConverter>();
+        public override FileExtension FileExtension => FileExtensions.Programming.Html;
+
+        public IEnumerable<IHtmlMediaConverter> MediaConverters { get; } = new IHtmlMediaConverter[]
         {
-            get
-            {
-                yield return "html";
-                yield return "htm";
-                yield return "xhtml";
-                yield return "xht";
-            }
-        }
+            new ImageConverter(),
+            new VideoConverter(),
+            new YouTubeConverter() 
+        };
+
+        public IHtmlMediaConverter DefaultConverter { get; set; } = new HightlightJsConverter();
 
         public override string VisitDocument(DocumentNode node)
         {
-            return string.Join(Environment.NewLine, node.Children.Select(Convert));
+            IEnumerable<string> convertion = node.Children.Select(Convert).ToArray();
+
+            return "<html>" + Environment.NewLine + "<head>" + Environment.NewLine
+                   + string.Join(Environment.NewLine, _usedMediaConverters.Select(x => x.Head))
+                   + Environment.NewLine + "</head>" + Environment.NewLine + "<body>" + Environment.NewLine
+                   + string.Join(Environment.NewLine, convertion)
+                   + Environment.NewLine + Environment.NewLine
+                   + string.Join(Environment.NewLine, _usedMediaConverters.Select(x => x.EndOfPage))
+                   + Environment.NewLine + "</body>" + Environment.NewLine + "</html>";
         }
 
         public override string VisitParagraph(ParagraphNode node)
@@ -82,12 +92,33 @@ namespace Dast.Converters
 
         public override string VisitMedia(MediaNode node)
         {
-            return "<pre>" + node.Content + "</pre>";
+            return VisitMediaBase(node, false);
         }
 
         public override string VisitMediaInline(MediaInlineNode node)
         {
-            return "<code>" + node.Content + "</code>";
+            return VisitMediaBase(node, true);
+        }
+
+        private string VisitMediaBase(MediaNodeBase node, bool inline)
+        {
+            IEnumerable<IHtmlMediaConverter> compatibtleConverters = MediaConverters.Where(x => x.Extensions.Any(e => e.Match(node.Extension)));
+
+            IHtmlMediaConverter mediaConverter;
+            if (node.Type.HasValue)
+            {
+                mediaConverter = MediaConverters.FirstOrDefault(x => x.DefaultType == node.Type.Value);
+                if (mediaConverter == null && DefaultConverter.DefaultType == node.Type.Value)
+                    mediaConverter = DefaultConverter;
+            }
+            else
+                mediaConverter = compatibtleConverters.FirstOrDefault() ?? DefaultConverter;
+
+            if (mediaConverter == null)
+                return "";
+
+            _usedMediaConverters.Add(mediaConverter);
+            return mediaConverter.Convert(node.Extension, node.Content, inline);
         }
 
         public override string VisitComment(CommentNode node)

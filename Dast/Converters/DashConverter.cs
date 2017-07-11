@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Dast.Converters.Base;
 using Dast.Converters.Utils;
@@ -10,15 +9,7 @@ namespace Dast.Converters
     {
         private int _listLevel = -1;
         public int RecommendedLineSize { get; set; } = 100;
-
-        public override IEnumerable<string> FileExtensions
-        {
-            get
-            {
-                yield return "dh";
-                yield return "dash";
-            }
-        }
+        public override FileExtension FileExtension => FileExtensions.Text.Dash;
 
         public override string VisitDocument(DocumentNode node)
         {

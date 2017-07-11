@@ -35,6 +35,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converters\Base\DashVisitorConverterBase.cs" />
+    <Compile Include="Converters\Media\Html\HightlightJsConverter.cs" />
+    <Compile Include="Converters\Media\Html\YoutubeConverter.cs" />
+    <Compile Include="Converters\Media\Html\VideoConverter.cs" />
+    <Compile Include="Converters\Media\Html\IHtmlMediaConverter.cs" />
+    <Compile Include="Converters\IMediaConverter.cs" />
+    <Compile Include="Converters\Media\Markdown\ImageConverter.cs" />
+    <Compile Include="Converters\Media\Html\ImageConverter.cs" />
+    <Compile Include="Converters\Utils\FileExtension.cs" />
     <Compile Include="Converters\Utils\UtilsExtensions.cs" />
     <Compile Include="Converters\DashConverter.cs" />
     <Compile Include="Converters\GithubMardownConverter.cs" />
@@ -44,5 +52,6 @@
     <Compile Include="IDocumentVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+using Dast.Converters.Utils;
 
 namespace Dast
 {
     public interface IDocumentConverter
     {
-        IEnumerable<string> FileExtensions { get; }
+        FileExtension FileExtension { get; }
         string Convert(IDocumentNode node);
     }
 }

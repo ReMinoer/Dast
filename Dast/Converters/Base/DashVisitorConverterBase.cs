@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Dast.Converters.Utils;
 
 namespace Dast.Converters.Base
 {
     public abstract class DashVisitorConverterBase : IDocumentVisitor, IDocumentConverter
     {
-        public abstract IEnumerable<string> FileExtensions { get; }
+        public abstract FileExtension FileExtension { get; }
 
         public string Convert(IDocumentNode node)
         {
