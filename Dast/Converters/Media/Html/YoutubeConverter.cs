@@ -18,6 +18,6 @@ namespace Dast.Converters.Media.Html
             }
         }
         
-        public string Convert(string extension, string content, bool inline) => $"<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/{content}\" frameborder=\"0\" allowfullscreen></iframe>";
+        public string Convert(string extension, string content, bool inline) => $"<figure><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/{content}\" frameborder=\"0\" allowfullscreen></iframe></figure>";
     }
 }

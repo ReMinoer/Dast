@@ -4,11 +4,13 @@ namespace Dast.Converters.Utils
 {
     public struct FileExtension
     {
+        public readonly string Name;
         public readonly string Main;
         public readonly string[] Others;
 
-        public FileExtension(string main, params string[] others)
+        public FileExtension(string name, string main, params string[] others)
         {
+            Name = name;
             Main = main;
             Others = others;
         }
@@ -19,35 +21,34 @@ namespace Dast.Converters.Utils
         }
     }
 
-    public class FileExtensions
+    static public class FileExtensions
     {
-        public class Text
+        static public class Text
         {
-            static public FileExtension Txt = new FileExtension("txt");
-            static public FileExtension Markdown = new FileExtension("md", "markdown");
-            static public FileExtension Dash = new FileExtension("dh", "dash");
-        }
-        
-        public class Image
-        {
-            static public FileExtension Png = new FileExtension("png");
-            static public FileExtension Jpeg = new FileExtension("jpg", "jpeg");
-            static public FileExtension Gif = new FileExtension("gif");
-            static public FileExtension Bitmap = new FileExtension("bmp", "dib", "rle");
-            static public FileExtension Svg = new FileExtension("svg", "svgz");
-            static public FileExtension Ico = new FileExtension("ico");
+            static public FileExtension Markdown = new FileExtension("Markdown", "md", "markdown");
+            static public FileExtension Dash = new FileExtension("Dash", "dh", "dash");
         }
 
-        public class Video
+        static public class Image
         {
-            static public FileExtension Mp4 = new FileExtension("mp4");
-            static public FileExtension YouTube = new FileExtension("youtube.com");
+            static public FileExtension Png = new FileExtension("PNG", "png");
+            static public FileExtension Jpeg = new FileExtension("JPEG", "jpg", "jpeg");
+            static public FileExtension Gif = new FileExtension("GIF", "gif");
+            static public FileExtension Bitmap = new FileExtension("Bitmap", "bmp", "dib", "rle");
+            static public FileExtension Svg = new FileExtension("SVG", "svg", "svgz");
+            static public FileExtension Ico = new FileExtension("ICO", "ico");
         }
 
-        public class Programming
+        static public class Video
         {
-            static public FileExtension Html = new FileExtension("html", "htm", "xhtml", "xht");
-            static public FileExtension Csharp = new FileExtension("cs");
+            static public FileExtension Mp4 = new FileExtension("MPEG-4", "mp4");
+            static public FileExtension YouTube = new FileExtension("Youtube", "youtube.com");
+        }
+
+        static public class Programming
+        {
+            static public FileExtension Html = new FileExtension("HTML", "html", "htm", "xhtml", "xht");
+            static public FileExtension Csharp = new FileExtension("C#", "cs");
         }
     }
 }

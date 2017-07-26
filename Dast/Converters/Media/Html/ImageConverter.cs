@@ -24,6 +24,6 @@ namespace Dast.Converters.Media.Html
             }
         }
         
-        public string Convert(string extension, string content, bool inline) => $"<div><img src=\"{content}\" alt=\"{Path.GetFileNameWithoutExtension(content)}\" /></div>";
+        public string Convert(string extension, string content, bool inline) => $"<figure><img src=\"{content}\" alt=\"{Path.GetFileNameWithoutExtension(content)}\" /></figure>";
     }
 }
