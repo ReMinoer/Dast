@@ -70,6 +70,18 @@ namespace Dast.Converters
             return string.Join(" ", node.Children.Select(Convert));
         }
 
+        public override string VisitLink(LinkNode node)
+        {
+            if (node.IsLocal)
+                return $"<a href=\"#{ node.Adress }\" >{ string.Join(" ", node.Children.Select(Convert)) }</a>";
+            return $"<a href=\"{ node.Adress }\" >{ string.Join(" ", node.Children.Select(Convert)) }</a>";
+        }
+
+        public override string VisitAdress(AdressNode node)
+        {
+            return $"<span id=\"{string.Join(" ", node.Names)}\"></span>";
+        }
+
         public override string VisitBold(BoldNode node)
         {
             return "<strong>" + string.Join(" ", node.Children.Select(Convert)) + "</strong>";

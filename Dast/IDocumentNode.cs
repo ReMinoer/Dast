@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Dast.Converters.Utils;
 
 namespace Dast
 {
@@ -91,6 +93,30 @@ namespace Dast
     {
         public interface IChild : IDocumentNode { }
         public override string Accept(IDocumentVisitor visitor) => visitor.VisitLine(this);
+    }
+
+    public class LinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        private string _adress;
+        public bool IsLocal { get; private set; }
+
+        public string Adress
+        {
+            get => _adress;
+            set
+            {
+                _adress = value;
+                IsLocal = !Adress.Contains('.', '/', '\\');
+            }
+        }
+
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitLink(this);
+    }
+
+    public class AdressNode : LeafNodeBase, LineNode.IChild
+    {
+        public List<string> Names { get; } = new List<string>();
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitAdress(this);
     }
 
     public class BoldNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild

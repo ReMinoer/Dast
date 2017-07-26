@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Dast.Converters.Utils
 {
-    static public class Extensions
+    static public class UtilsExtensions
     {
         static public string Aggregate<T>(this IEnumerable<T> enumerable, Func<T, string> func)
         {
@@ -19,6 +19,11 @@ namespace Dast.Converters.Utils
         static public bool HasMultipleLine(this string text)
         {
             return text.Contains('\n');
+        }
+
+        static public bool Contains(this string text, params char[] characters)
+        {
+            return text.Any(t => characters.Any(c => t == c));
         }
     }
 }

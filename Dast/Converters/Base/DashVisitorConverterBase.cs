@@ -17,6 +17,8 @@ namespace Dast.Converters.Base
         public abstract string VisitList(ListNode node);
         public abstract string VisitListItem(ListItemNode node);
         public abstract string VisitLine(LineNode node);
+        public abstract string VisitLink(LinkNode node);
+        public abstract string VisitAdress(AdressNode node);
         public abstract string VisitBold(BoldNode node);
         public abstract string VisitItalic(ItalicNode node);
         public abstract string VisitMark(MarkNode node);

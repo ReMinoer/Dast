@@ -61,6 +61,19 @@ namespace Dast.Converters
             return string.Join(" ", node.Children.Select(Convert)) + Environment.NewLine;
         }
 
+        public override string VisitLink(LinkNode node)
+        {
+            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && textNode.Content == node.Adress)
+                return $"[[{ node.Adress }]]";
+
+            return $"[{ string.Join(" ", node.Children.Select(Convert)) }][{ node.Adress }]";
+        }
+
+        public override string VisitAdress(AdressNode node)
+        {
+            return $"@[{ string.Join("|", node.Names) }]";
+        }
+
         public override string VisitBold(BoldNode node)
         {
             return "*[" + string.Join(" ", node.Children.Select(Convert)) + "]";
