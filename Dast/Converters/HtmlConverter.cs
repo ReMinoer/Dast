@@ -24,14 +24,24 @@ namespace Dast.Converters
         public override string VisitDocument(DocumentNode node)
         {
             IEnumerable<string> convertion = node.Children.Select(Convert).ToArray();
+            
+            string result = $"<html>{Environment.NewLine}<head>{Environment.NewLine}<title>{node.MainTitles[0].Accept(this)}</title>";
 
-            return "<html>" + Environment.NewLine + "<head>" + Environment.NewLine
-                   + string.Join(Environment.NewLine, _usedMediaConverters.Select(x => x.Head))
-                   + Environment.NewLine + "</head>" + Environment.NewLine + "<body>" + Environment.NewLine
-                   + string.Join(Environment.NewLine, convertion)
-                   + Environment.NewLine + Environment.NewLine
-                   + string.Join(Environment.NewLine, _usedMediaConverters.Select(x => x.EndOfPage))
-                   + Environment.NewLine + "</body>" + Environment.NewLine + "</html>";
+            string head = string.Join(Environment.NewLine, _usedMediaConverters.Where(x => !string.IsNullOrEmpty(x.Head)).Select(x => $"<!-- {x.DisplayName} -->" + Environment.NewLine + x.Head));
+            if (!string.IsNullOrWhiteSpace(head))
+                result += Environment.NewLine + head;
+
+            result += Environment.NewLine + "</head>" + Environment.NewLine + "<body>" + Environment.NewLine
+                + string.Join(Environment.NewLine, convertion)
+                + Environment.NewLine + Environment.NewLine;
+
+            string endOfPage = string.Join(Environment.NewLine, _usedMediaConverters.Where(x => !string.IsNullOrEmpty(x.EndOfPage)).Select(x => $"<!-- {x.DisplayName} -->" + Environment.NewLine + x.EndOfPage));
+            if (!string.IsNullOrWhiteSpace(endOfPage))
+                result += Environment.NewLine + endOfPage;
+
+            result += "</body>" + Environment.NewLine + "</html>";
+
+            return result;
         }
 
         public override string VisitParagraph(ParagraphNode node)
