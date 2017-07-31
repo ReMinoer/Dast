@@ -19,6 +19,7 @@ namespace Dast.Converters
         {
             new ImageConverter(),
             new VideoConverter(),
+            new CsvConverter(),
             new YouTubeConverter() 
         };
 
