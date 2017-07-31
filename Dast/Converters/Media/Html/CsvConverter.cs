@@ -22,14 +22,14 @@ namespace Dast.Converters.Media.Html
             }
         }
 
-        public override string Convert(string extension, string content, bool inline, bool useRecommandedCss)
+        public override string Convert(string extension, string content, bool inline)
         {
             string[] lines = content.Split(new [] { "\r\n", "\n" }, StringSplitOptions.None);
             char delimiter = lines[0].Where(x => !char.IsLetterOrDigit(x)).GroupBy(x => x).OrderByDescending(x => x.Count()).First().Key;
 
             string result = "<figure><table";
 
-            if (useRecommandedCss)
+            if (UseRecommandedCss)
                 result += $" class=\"{TableClass}\"";
 
             result += ">" + Environment.NewLine;

@@ -23,6 +23,6 @@ namespace Dast.Converters.Media.Html
             }
         }
         
-        public override string Convert(string extension, string content, bool inline, bool useRecommandedCss) => $"<figure><img src=\"{content}\" alt=\"{Path.GetFileNameWithoutExtension(content)}\" /></figure>";
+        public override string Convert(string extension, string content, bool inline) => $"<figure><img src=\"{content}\" alt=\"{Path.GetFileNameWithoutExtension(content)}\" /></figure>";
     }
 }

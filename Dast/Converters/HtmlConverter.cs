@@ -10,8 +10,6 @@ namespace Dast.Converters
     public class HtmlConverter : DashVisitorConverterBase
     {
         private readonly HashSet<IHtmlMediaConverter> _usedMediaConverters = new HashSet<IHtmlMediaConverter>();
-        public bool UseRecommandedCss { get; set; } = true;
-
         public override FileExtension FileExtension => FileExtensions.Programming.Html;
         public IHtmlMediaConverter DefaultConverter { get; set; } = new HightlightJsConverter();
 
@@ -41,7 +39,7 @@ namespace Dast.Converters
                 {
                     converterCss += converter.MandatoryCss;
                 }
-                if (UseRecommandedCss && !string.IsNullOrEmpty(converter.RecommandedCss))
+                if (converter.UseRecommandedCss && !string.IsNullOrEmpty(converter.RecommandedCss))
                 {
                     if (!string.IsNullOrEmpty(converterCss))
                         converterCss += Environment.NewLine;
@@ -168,7 +166,7 @@ namespace Dast.Converters
                 return "";
 
             _usedMediaConverters.Add(mediaConverter);
-            return mediaConverter.Convert(node.Extension, node.Content, inline, UseRecommandedCss);
+            return mediaConverter.Convert(node.Extension, node.Content, inline);
         }
 
         public override string VisitComment(CommentNode node)

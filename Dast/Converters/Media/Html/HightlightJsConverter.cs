@@ -27,7 +27,7 @@ namespace Dast.Converters.Media.Html
             }
         }
 
-        public override string Convert(string extension, string content, bool inline, bool useRecommandedCss)
+        public override string Convert(string extension, string content, bool inline)
         {
             string keyword = GetExtentionKeyword(extension);
             string languageClass = string.IsNullOrWhiteSpace(keyword) ? "hljs no-highlight" : $"language-{keyword}";

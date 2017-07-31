@@ -17,6 +17,6 @@ namespace Dast.Converters.Media.Html
             }
         }
         
-        public override string Convert(string extension, string content, bool inline, bool useRecommandedCss) => $"<figure><video src=\"{content}\" width=\"560\" height=\"315\" controls /></figure>";
+        public override string Convert(string extension, string content, bool inline) => $"<figure><video src=\"{content}\" width=\"560\" height=\"315\" controls /></figure>";
     }
 }

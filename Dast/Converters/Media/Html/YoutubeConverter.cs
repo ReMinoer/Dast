@@ -17,6 +17,6 @@ namespace Dast.Converters.Media.Html
             }
         }
         
-        public override string Convert(string extension, string content, bool inline, bool useRecommandedCss) => $"<figure><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/{content}\" frameborder=\"0\" allowfullscreen></iframe></figure>";
+        public override string Convert(string extension, string content, bool inline) => $"<figure><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/{content}\" frameborder=\"0\" allowfullscreen></iframe></figure>";
     }
 }
