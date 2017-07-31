@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Dast.Converters.Media.Html.Base;
 using Dast.Converters.Utils;
 
 namespace Dast.Converters.Media.Html
 {
-    public class ImageConverter : IHtmlMediaConverter
+    public class ImageConverter : HtmlMediaConverterBase
     {
-        public string DisplayName => "HTML images";
-        public MediaType DefaultType => MediaType.Visual;
-        public string Head => null;
-        public string EndOfPage => null;
+        public override string DisplayName => "HTML images";
+        public override MediaType DefaultType => MediaType.Visual;
 
-        public IEnumerable<FileExtension> Extensions
+        public override IEnumerable<FileExtension> Extensions
         {
             get
             {
@@ -24,6 +23,6 @@ namespace Dast.Converters.Media.Html
             }
         }
         
-        public string Convert(string extension, string content, bool inline) => $"<figure><img src=\"{content}\" alt=\"{Path.GetFileNameWithoutExtension(content)}\" /></figure>";
+        public override string Convert(string extension, string content, bool inline, bool useRecommandedCss) => $"<figure><img src=\"{content}\" alt=\"{Path.GetFileNameWithoutExtension(content)}\" /></figure>";
     }
 }

@@ -35,7 +35,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converters\Base\DashVisitorConverterBase.cs" />
+    <Compile Include="Converters\Media\Html\CsvConverter.cs" />
     <Compile Include="Converters\Media\Html\HightlightJsConverter.cs" />
+    <Compile Include="Converters\Media\Html\Base\HtmlMediaConverterBase.cs" />
     <Compile Include="Converters\Media\Html\YoutubeConverter.cs" />
     <Compile Include="Converters\Media\Html\VideoConverter.cs" />
     <Compile Include="Converters\Media\Html\IHtmlMediaConverter.cs" />

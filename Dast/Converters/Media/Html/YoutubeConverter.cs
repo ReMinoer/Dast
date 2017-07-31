@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
+using Dast.Converters.Media.Html.Base;
 using Dast.Converters.Utils;
 
 namespace Dast.Converters.Media.Html
 {
-    public class YouTubeConverter : IHtmlMediaConverter
+    public class YouTubeConverter : HtmlMediaConverterBase
     {
-        public string DisplayName => "YouTube videos";
-        public MediaType DefaultType => MediaType.Visual;
-        public string Head => null;
-        public string EndOfPage => null;
+        public override string DisplayName => "YouTube videos";
+        public override MediaType DefaultType => MediaType.Visual;
 
-        public IEnumerable<FileExtension> Extensions
+        public override IEnumerable<FileExtension> Extensions
         {
             get
             {
@@ -18,6 +17,6 @@ namespace Dast.Converters.Media.Html
             }
         }
         
-        public string Convert(string extension, string content, bool inline) => $"<figure><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/{content}\" frameborder=\"0\" allowfullscreen></iframe></figure>";
+        public override string Convert(string extension, string content, bool inline, bool useRecommandedCss) => $"<figure><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/{content}\" frameborder=\"0\" allowfullscreen></iframe></figure>";
     }
 }

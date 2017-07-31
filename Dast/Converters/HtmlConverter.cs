@@ -10,7 +10,10 @@ namespace Dast.Converters
     public class HtmlConverter : DashVisitorConverterBase
     {
         private readonly HashSet<IHtmlMediaConverter> _usedMediaConverters = new HashSet<IHtmlMediaConverter>();
+        public bool UseRecommandedCss { get; set; } = true;
+
         public override FileExtension FileExtension => FileExtensions.Programming.Html;
+        public IHtmlMediaConverter DefaultConverter { get; set; } = new HightlightJsConverter();
 
         public IEnumerable<IHtmlMediaConverter> MediaConverters { get; } = new IHtmlMediaConverter[]
         {
@@ -18,8 +21,6 @@ namespace Dast.Converters
             new VideoConverter(),
             new YouTubeConverter() 
         };
-
-        public IHtmlMediaConverter DefaultConverter { get; set; } = new HightlightJsConverter();
 
         public override string VisitDocument(DocumentNode node)
         {
@@ -30,6 +31,32 @@ namespace Dast.Converters
             string head = string.Join(Environment.NewLine, _usedMediaConverters.Where(x => !string.IsNullOrEmpty(x.Head)).Select(x => $"<!-- {x.DisplayName} -->" + Environment.NewLine + x.Head));
             if (!string.IsNullOrWhiteSpace(head))
                 result += Environment.NewLine + head;
+
+            string css = "";
+            foreach (IHtmlMediaConverter converter in _usedMediaConverters)
+            {
+                string converterCss = "";
+                if (!string.IsNullOrEmpty(converter.MandatoryCss))
+                {
+                    converterCss += converter.MandatoryCss;
+                }
+                if (UseRecommandedCss && !string.IsNullOrEmpty(converter.RecommandedCss))
+                {
+                    if (!string.IsNullOrEmpty(converterCss))
+                        converterCss += Environment.NewLine;
+                    converterCss += converter.RecommandedCss;
+                }
+
+                if (string.IsNullOrEmpty(converterCss))
+                    continue;
+
+                if (!string.IsNullOrEmpty(css))
+                    css += Environment.NewLine;
+                css += $"/* {converter.DisplayName} */" + Environment.NewLine + converterCss;
+            }
+
+            if (!string.IsNullOrWhiteSpace(css))
+                result += Environment.NewLine + $"<style media=\"screen\" type=\"text/css\">{Environment.NewLine}{css}{Environment.NewLine}</style>";
 
             result += Environment.NewLine + "</head>" + Environment.NewLine + "<body>" + Environment.NewLine
                 + string.Join(Environment.NewLine, convertion)
@@ -140,7 +167,7 @@ namespace Dast.Converters
                 return "";
 
             _usedMediaConverters.Add(mediaConverter);
-            return mediaConverter.Convert(node.Extension, node.Content, inline);
+            return mediaConverter.Convert(node.Extension, node.Content, inline, UseRecommandedCss);
         }
 
         public override string VisitComment(CommentNode node)
