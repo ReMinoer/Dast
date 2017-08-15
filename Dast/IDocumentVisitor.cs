@@ -8,8 +8,11 @@ namespace Dast
         string VisitList(ListNode node);
         string VisitListItem(ListItemNode node);
         string VisitLine(LineNode node);
-        string VisitLink(LinkNode node);
+        string VisitInternalLink(InternalLinkNode node);
+        string VisitExternalLink(ExternalLinkNode node);
         string VisitAdress(AdressNode node);
+        string VisitReference(ReferenceNode node);
+        string VisitNote(NoteNode node);
         string VisitBold(BoldNode node);
         string VisitItalic(ItalicNode node);
         string VisitMark(MarkNode node);

@@ -96,16 +96,29 @@ namespace Dast.Converters
             return string.Join(" ", node.Children.Select(Convert));
         }
 
-        public override string VisitLink(LinkNode node)
+        public override string VisitInternalLink(InternalLinkNode node)
         {
-            if (node.IsLocal)
-                return $"<a href=\"#{ node.Adress }\" >{ string.Join(" ", node.Children.Select(Convert)) }</a>";
-            return $"<a href=\"{ node.Adress }\" >{ string.Join(" ", node.Children.Select(Convert)) }</a>";
+            return $"<a href=\"#{ ToIdentifier(node.AdressNode?.Names[0] ?? node.AdressByDefault) }\">{ string.Join(" ", node.Children.Select(Convert)) }</a>";
+        }
+
+        public override string VisitExternalLink(ExternalLinkNode node)
+        {
+            return $"<a href=\"{ node.Adress }\">{ string.Join(" ", node.Children.Select(Convert)) }</a>";
         }
 
         public override string VisitAdress(AdressNode node)
         {
-            return $"<span id=\"{string.Join(" ", node.Names)}\"></span>";
+            return $"<span id=\"{ ToIdentifier(node.Names[0]) }\"></span>";
+        }
+
+        public override string VisitReference(ReferenceNode node, int index)
+        {
+            return $"<span class=\"dast-reference\">{ string.Join(" ", node.Children.Select(Convert)) }<sup><a href=\"#dast-note-{ index }\">{ index }</a></sup></span>";
+        }
+
+        public override string VisitNote(NoteNode node, int index)
+        {
+            return $"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. { string.Join(" ", node.Children.Select(Convert)) }</p>";
         }
 
         public override string VisitBold(BoldNode node)
@@ -182,22 +195,25 @@ namespace Dast.Converters
         {
             string result = "";
             bool upperNext = false;
-            foreach (char c in name)
+
+            int startIndex = name.Length;
+            for (int i = 0; i < name.Length; i++)
             {
-                switch (c)
+                if (!char.IsLetter(name[i]))
+                    continue;
+
+                startIndex = i;
+                break;
+            }
+
+            foreach (char c in name.Skip(startIndex))
+            {
+                if (!char.IsLetterOrDigit(c) || char.IsWhiteSpace(c))
+                    upperNext = true;
+                else
                 {
-                    case ' ':
-                    case '\t':
-                    {
-                        upperNext = true;
-                    }
-                    break;
-                    default:
-                    {
-                        result += upperNext ? char.ToUpperInvariant(c) : c;
-                        upperNext = false;
-                    }
-                    break;
+                    result += upperNext ? char.ToUpperInvariant(c) : c;
+                    upperNext = false;
                 }
             }
 

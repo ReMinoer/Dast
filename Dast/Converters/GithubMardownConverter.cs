@@ -52,9 +52,19 @@ namespace Dast.Converters
             return string.Join(" ", node.Children.Select(Convert)) + Environment.NewLine;
         }
 
-        public override string VisitLink(LinkNode node)
+        public override string VisitInternalLink(InternalLinkNode node)
         {
-            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && textNode.Content == node.Adress)
+            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode
+                && (node.AdressNode != null && node.AdressNode.Names.Any(x => x.Equals(textNode.Content, StringComparison.InvariantCultureIgnoreCase))
+                    || node.AdressByDefault.Equals(textNode.Content, StringComparison.InvariantCultureIgnoreCase)))
+                return $"<#{ HtmlConverter.ToIdentifier(node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "") }>";
+
+            return "[" + string.Join(" ", node.Children.Select(Convert)) + "](#" + (node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "") + ")";
+        }
+
+        public override string VisitExternalLink(ExternalLinkNode node)
+        {
+            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && node.Adress.Equals(textNode.Content, StringComparison.InvariantCultureIgnoreCase))
                 return $"<{ node.Adress }>";
 
             return "[" + string.Join(" ", node.Children.Select(Convert)) + "](" + node.Adress + ")";
@@ -62,7 +72,17 @@ namespace Dast.Converters
 
         public override string VisitAdress(AdressNode node)
         {
-            return $"<span id=\"{string.Join(" ", node.Names)}\"></span>";
+            return $"<span id=\"{ HtmlConverter.ToIdentifier(node.Names[0]) }\"></span>";
+        }
+
+        public override string VisitReference(ReferenceNode node, int index)
+        {
+            return $"<span class=\"dast-reference\">{ string.Join(" ", node.Children.Select(Convert)) }<sup><a href=\"#dast-note-{ index }\">{ index }</a></sup></span>";
+        }
+
+        public override string VisitNote(NoteNode node, int index)
+        {
+            return $"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. { string.Join(" ", node.Children.Select(Convert)) }</p>{ Environment.NewLine }";
         }
 
         public override string VisitBold(BoldNode node)

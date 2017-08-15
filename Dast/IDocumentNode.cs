@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Dast.Converters.Utils;
 
 namespace Dast
 {
@@ -95,28 +93,36 @@ namespace Dast
         public override string Accept(IDocumentVisitor visitor) => visitor.VisitLine(this);
     }
 
-    public class LinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
+    public class InternalLinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        private string _adress;
-        public bool IsLocal { get; private set; }
+        public AdressNode AdressNode { get; set; }
+        public string AdressByDefault { get; set; }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitInternalLink(this);
+    }
 
-        public string Adress
-        {
-            get => _adress;
-            set
-            {
-                _adress = value;
-                IsLocal = !Adress.Contains('.', '/', '\\');
-            }
-        }
-
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitLink(this);
+    public class ExternalLinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        public string Adress { get; set; }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitExternalLink(this);
     }
 
     public class AdressNode : LeafNodeBase, LineNode.IChild
     {
         public List<string> Names { get; } = new List<string>();
         public override string Accept(IDocumentVisitor visitor) => visitor.VisitAdress(this);
+    }
+
+    public class ReferenceNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
+    {
+        public NoteNode Note { get; set; }
+        public override string Accept(IDocumentVisitor visitor) => visitor.VisitReference(this);
+    }
+
+    public class NoteNode : DocumentNode.IChild
+    {
+        public LineNode Line { get; set; }
+        public IEnumerable<IDocumentNode> Children { get { yield return Line; } }
+        public string Accept(IDocumentVisitor visitor) => visitor.VisitNote(this);
     }
 
     public class BoldNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
