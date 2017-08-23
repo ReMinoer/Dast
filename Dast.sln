@@ -3,19 +3,34 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dast", "Dast\Dast.csproj", "{D76A0B3B-5C48-447B-ACB9-4E710689FAEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast", "Dast\Dast.csproj", "{D76A0B3B-5C48-447B-ACB9-4E710689FAEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dast.Outputs.Html", "Outputs\Dast.Outputs.Html\Dast.Outputs.Html.csproj", "{3C417A04-B937-410F-B85B-E0311CDAC227}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Outputs.Html", "Outputs\Dast.Outputs.Html\Dast.Outputs.Html.csproj", "{3C417A04-B937-410F-B85B-E0311CDAC227}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Outputs", "Outputs", "{3A4AB93A-8C9F-4CC7-977A-40D918240B1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dast.Outputs.GitHubMarkdown", "Outputs\Dast.Outputs.GitHubMarkdown\Dast.Outputs.GitHubMarkdown.csproj", "{7DC91293-73E5-4EE8-A211-6462E08A6F38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Outputs.GitHubMarkdown", "Outputs\Dast.Outputs.GitHubMarkdown\Dast.Outputs.GitHubMarkdown.csproj", "{7DC91293-73E5-4EE8-A211-6462E08A6F38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dast.Outputs.Dash", "Outputs\Dast.Outputs.Dash\Dast.Outputs.Dash.csproj", "{F0CC4B4A-BEFA-42F9-8DD1-B49E76631FD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Outputs.Dash", "Outputs\Dast.Outputs.Dash\Dast.Outputs.Dash.csproj", "{F0CC4B4A-BEFA-42F9-8DD1-B49E76631FD5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Executables", "Executables", "{C65526A9-0634-4225-8E91-2B831CC558D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dast.Console", "Executables\Dast.Console\Dast.Console.csproj", "{53636C4B-7075-41BF-981E-FC1D6103BEC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Console", "Executables\Dast.Console\Dast.Console.csproj", "{53636C4B-7075-41BF-981E-FC1D6103BEC5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inputs", "Inputs", "{807523F9-C274-4B4B-9368-85D16479EBDD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Inputs.Dash", "Inputs\Dast.Inputs.Dash\Dast.Inputs.Dash.csproj", "{E13738A3-1F74-4D47-ACFF-CC5B48E76A31}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4844FC06-5391-4656-BC59-F7F008BCDEB6} = {4844FC06-5391-4656-BC59-F7F008BCDEB6}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{E34C93C7-FA2B-4819-8D1D-608241FE9895}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaGram", "External\MetaGram.Converter\MetaGram\MetaGram.csproj", "{B8504547-B6C6-42B6-B66B-5D97393D467D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaGram.Converter", "External\MetaGram.Converter\MetaGram.Converter\MetaGram.Converter.csproj", "{03700C30-C98B-4D58-898C-12CA360DC967}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetaGram.Converter.Console", "External\MetaGram.Converter\MetaGram.Converter.Console\MetaGram.Converter.Console.csproj", "{4844FC06-5391-4656-BC59-F7F008BCDEB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +58,22 @@ Global
 		{53636C4B-7075-41BF-981E-FC1D6103BEC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53636C4B-7075-41BF-981E-FC1D6103BEC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53636C4B-7075-41BF-981E-FC1D6103BEC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E13738A3-1F74-4D47-ACFF-CC5B48E76A31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E13738A3-1F74-4D47-ACFF-CC5B48E76A31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E13738A3-1F74-4D47-ACFF-CC5B48E76A31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E13738A3-1F74-4D47-ACFF-CC5B48E76A31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8504547-B6C6-42B6-B66B-5D97393D467D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8504547-B6C6-42B6-B66B-5D97393D467D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8504547-B6C6-42B6-B66B-5D97393D467D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8504547-B6C6-42B6-B66B-5D97393D467D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03700C30-C98B-4D58-898C-12CA360DC967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03700C30-C98B-4D58-898C-12CA360DC967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03700C30-C98B-4D58-898C-12CA360DC967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03700C30-C98B-4D58-898C-12CA360DC967}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4844FC06-5391-4656-BC59-F7F008BCDEB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4844FC06-5391-4656-BC59-F7F008BCDEB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4844FC06-5391-4656-BC59-F7F008BCDEB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4844FC06-5391-4656-BC59-F7F008BCDEB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,6 +83,10 @@ Global
 		{7DC91293-73E5-4EE8-A211-6462E08A6F38} = {3A4AB93A-8C9F-4CC7-977A-40D918240B1C}
 		{F0CC4B4A-BEFA-42F9-8DD1-B49E76631FD5} = {3A4AB93A-8C9F-4CC7-977A-40D918240B1C}
 		{53636C4B-7075-41BF-981E-FC1D6103BEC5} = {C65526A9-0634-4225-8E91-2B831CC558D5}
+		{E13738A3-1F74-4D47-ACFF-CC5B48E76A31} = {807523F9-C274-4B4B-9368-85D16479EBDD}
+		{B8504547-B6C6-42B6-B66B-5D97393D467D} = {E34C93C7-FA2B-4819-8D1D-608241FE9895}
+		{03700C30-C98B-4D58-898C-12CA360DC967} = {E34C93C7-FA2B-4819-8D1D-608241FE9895}
+		{4844FC06-5391-4656-BC59-F7F008BCDEB6} = {E34C93C7-FA2B-4819-8D1D-608241FE9895}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C01F5808-52A2-4B22-9F43-FA9D28A4EFB0}

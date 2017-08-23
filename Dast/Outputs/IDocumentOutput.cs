@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Dast
+namespace Dast.Outputs
 {
     public interface IDocumentOutput : IDocumentFormat
     {

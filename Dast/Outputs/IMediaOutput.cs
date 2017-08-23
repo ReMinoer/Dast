@@ -1,4 +1,4 @@
-namespace Dast
+namespace Dast.Outputs
 {
     public interface IMediaOutput : IMediaOutput<string>
     {

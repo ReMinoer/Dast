@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Antlr4 Include="..\..\External\Dash\DashLexer.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Dast.Inputs.Dash</CustomToolNamespace>
+      <Listener>False</Listener>
+    </Antlr4>
+    <Antlr4 Include="obj\metagram\csharp\DashParser.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Dast.Inputs.Dash</CustomToolNamespace>
+      <Listener>False</Listener>
+    </Antlr4>
+    <None Include="..\..\External\Dash\DashLexer.g4" Link="DashLexer.g4" />
+    <None Include="obj\metagram\csharp\DashParser.g4" Link="DashParser.g4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Antlr4" Version="4.6.4" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\Dast\Dast.csproj" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet &quot;$(ProjectDir)..\..\External\MetaGram.Converter\MetaGram.Converter.Console\bin\Debug\netcoreapp1.1\MetaGram.Converter.Console.dll&quot; &quot;$(ProjectDir)..\..\External\Dash\DashParser.g4&quot; &quot;$(ProjectDir)obj\metagram&quot; csharp" />
+  </Target>
+
+</Project>

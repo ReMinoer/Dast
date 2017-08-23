@@ -8,7 +8,7 @@ namespace Dast.Outputs.GitHubMarkdown
 {
     public class GitHubMardownOutput : DocumentOutputBase<GitHubMardownOutput.IMediaOutput>
     {
-        public interface IMediaOutput : Dast.IMediaOutput { }
+        public interface IMediaOutput : Outputs.IMediaOutput { }
 
         public override string DisplayName => "GitHub Markdown";
         public override FileExtension FileExtension => FileExtensions.Text.Markdown;

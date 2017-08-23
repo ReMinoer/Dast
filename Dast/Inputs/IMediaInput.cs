@@ -1,4 +1,4 @@
-namespace Dast
+namespace Dast.Inputs
 {
     public interface IMediaInput : IMediaInput<string>
     {

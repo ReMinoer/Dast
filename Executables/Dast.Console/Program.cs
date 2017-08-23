@@ -5,10 +5,12 @@ using System.Composition.Convention;
 using System.Composition.Hosting;
 using System.Reflection;
 using System.Runtime.Loader;
+using Dast.Inputs;
+using Dast.Outputs;
 
 namespace Dast.Console
 {
-    class Program
+    static internal class Program
     {
 
 #if !DEBUG
@@ -16,14 +18,19 @@ namespace Dast.Console
 #else
         static private IEnumerable<string> DebugPlugins
         {
-            get { yield return "../../../../../Outputs"; }
+            get
+            {
+                yield return "../../../../../Outputs";
+                yield return "../../../../../Inputs";
+            }
         }
 #endif
 
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new []{ "../../../../../README.dh", "html", "md" };
+            if (args.Length == 0)
+                args = new []{ "../../../../../README.dh", "md" };
 #endif
 
             if (Process(args))
@@ -110,7 +117,7 @@ namespace Dast.Console
                 outputCatalog.AddRange(documentOutputs);
             }
 
-            IDocumentInput<string> input = inputCatalog.BestMatch(file.Extension);
+            IDocumentInput<string> input = inputCatalog.BestMatch(file.Extension.TrimStart('.'));
 
             if (input == null)
             {
@@ -136,7 +143,7 @@ namespace Dast.Console
             foreach (IDocumentOutput<string> output in outputs)
             {
                 System.Console.WriteLine($"Converting to {output.DisplayName}...");
-                File.WriteAllText(Path.ChangeExtension(file.Name, output.FileExtension.Main), output.Convert(document));
+                File.WriteAllText(Path.ChangeExtension(file.FullName, output.FileExtension.Main), output.Convert(document));
             }
 
             return true;

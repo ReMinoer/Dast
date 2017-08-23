@@ -8,7 +8,7 @@ namespace Dast.Outputs.Html
 {
     public class HtmlOutput : DocumentOutputBase<HtmlOutput.IMediaOutput>
     {
-        public interface IMediaOutput : Dast.IMediaOutput
+        public interface IMediaOutput : Outputs.IMediaOutput
         {
             string Head { get; }
             string EndOfPage { get; }
@@ -27,7 +27,10 @@ namespace Dast.Outputs.Html
         {
             IEnumerable<string> convertion = node.Children.Select(Convert).ToArray();
             
-            string result = $"<html>{Environment.NewLine}<head>{Environment.NewLine}<title>{node.MainTitles[0].Accept(this)}</title>";
+            string result = $"<html>{Environment.NewLine}<head>";
+
+            if (node.MainTitles.Count > 0)
+                result += $"{Environment.NewLine}<title>{node.MainTitles[0].Accept(this)}</title>";
 
             string head = string.Join(Environment.NewLine, _usedMediaConverters.Where(x => !string.IsNullOrEmpty(x.Head)).Select(x => $"<!-- {x.DisplayName} -->" + Environment.NewLine + x.Head));
             if (!string.IsNullOrWhiteSpace(head))

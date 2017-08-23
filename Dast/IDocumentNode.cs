@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Dast
@@ -31,7 +32,7 @@ namespace Dast
 
         protected ParentNodeBase()
         {
-            _readOnlyChildren = Children.AsReadOnly();
+            _readOnlyChildren = new ReadOnlyCollection<TChild>(Children);
         }
 
         public abstract string Accept(IDocumentVisitor visitor);

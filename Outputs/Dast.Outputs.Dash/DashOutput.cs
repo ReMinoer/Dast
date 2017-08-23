@@ -6,7 +6,7 @@ namespace Dast.Outputs.Dash
 {
     public class DashOutput : DocumentOutputBase<DashOutput.IMediaOutput>
     {
-        public interface IMediaOutput : Dast.IMediaOutput {}
+        public interface IMediaOutput : Outputs.IMediaOutput {}
 
         public override string DisplayName => "Dash";
         public override FileExtension FileExtension => FileExtensions.Text.Dash;

@@ -1,0 +1,8 @@
+[submodule "External/Dash"]
+	path = External/Dash
+	url = https://github.com/ReMinoer/Dash.git
+	branch = master
+[submodule "External/MetaGram.Converter"]
+	path = External/MetaGram.Converter
+	url = https://github.com/ReMinoer/MetaGram.Converter.git
+	branch = master
