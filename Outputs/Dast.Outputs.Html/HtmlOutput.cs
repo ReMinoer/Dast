@@ -211,7 +211,7 @@ namespace Dast.Outputs.Html
                 break;
             }
 
-            foreach (char c in name.Skip(startIndex))
+            foreach (char c in name.Cast<char>().Skip(startIndex))
             {
                 if (!char.IsLetterOrDigit(c) || char.IsWhiteSpace(c))
                     upperNext = true;

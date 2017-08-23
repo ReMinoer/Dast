@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using DashCSharp;
 using Dast.Outputs.Base;
 
 namespace Dast.Inputs.Dash
@@ -250,7 +251,7 @@ namespace Dast.Inputs.Dash
 
         private ParentNodeBase<LineNode.IChild> ResolveLink(string adress)
         {
-            if (adress.Contains('.', '/', '\\'))
+            if (adress.ContainsAny('.', '/', '\\'))
                 return new ExternalLinkNode { Adress = adress };
 
             var internalLinkNode = new InternalLinkNode

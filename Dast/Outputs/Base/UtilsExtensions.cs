@@ -18,12 +18,12 @@ namespace Dast.Outputs.Base
 
         static public bool HasMultipleLine(this string text)
         {
-            return text.Contains('\n');
+            return text.Cast<char>().Contains('\n');
         }
 
-        static public bool Contains(this string text, params char[] characters)
+        static public bool ContainsAny(this string text, params char[] characters)
         {
-            return text.Any(t => characters.Any(c => t == c));
+            return text.Cast<char>().Any(c => characters.Any(character => character == c));
         }
     }
 }

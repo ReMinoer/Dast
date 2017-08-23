@@ -6,3 +6,7 @@
 	path = External/MetaGram.Converter
 	url = https://github.com/ReMinoer/MetaGram.Converter.git
 	branch = master
+[submodule "External/DashCSharp"]
+	path = External/DashCSharp
+	url = https://github.com/ReMinoer/DashCSharp.git
+	branch = master

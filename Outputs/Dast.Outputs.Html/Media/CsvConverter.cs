@@ -24,7 +24,7 @@ namespace Dast.Outputs.Html.Media
         public override string Convert(string extension, string content, bool inline)
         {
             string[] lines = content.Split(new [] { "\r\n", "\n" }, StringSplitOptions.None);
-            char delimiter = lines[0].Where(x => !char.IsLetterOrDigit(x)).GroupBy(x => x).OrderByDescending(x => x.Count()).First().Key;
+            char delimiter = lines[0].Cast<char>().Where(x => !char.IsLetterOrDigit(x)).GroupBy(x => x).OrderByDescending(x => x.Count()).First().Key;
 
             string result = "<figure><table";
 
