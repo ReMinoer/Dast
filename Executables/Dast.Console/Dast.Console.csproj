@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Dast.Extensibility\Dast.Extensibility.csproj" />
     <ProjectReference Include="..\..\Dast\Dast.csproj" />
   </ItemGroup>
 

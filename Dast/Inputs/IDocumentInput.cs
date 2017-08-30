@@ -12,9 +12,9 @@ namespace Dast.Inputs
         IDocumentNode Convert(TInput input);
     }
 
-    public interface IDocumentInput<TMedia, in TInput> : IDocumentInput<TInput>
+    public interface IDocumentInput<out TMedia, in TInput> : IDocumentInput<TInput>
         where TMedia : IMediaInput
     {
-        new ICollection<TMedia> MediaInputs { get; }
+        new IEnumerable<TMedia> MediaInputs { get; }
     }
 }

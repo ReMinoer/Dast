@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Linq;
+using Dast.Extensibility;
 using Dast.Outputs.Base;
 
 namespace Dast.Outputs.Dash
 {
-    public class DashOutput : DocumentOutputBase<DashOutput.IMediaOutput>
+    public class DashOutput : ExtensibleDocumentOutputBase<Media.Contracts.Dash.IMediaOutput>
     {
-        public interface IMediaOutput : Outputs.IMediaOutput {}
-
         public override string DisplayName => "Dash";
         public override FileExtension FileExtension => FileExtensions.Text.Dash;
 
@@ -87,12 +86,12 @@ namespace Dast.Outputs.Dash
             return $"@[{ string.Join("|", node.Names) }]";
         }
 
-        public override string VisitReference(ReferenceNode node, int index)
+        protected override string VisitReference(ReferenceNode node, int index)
         {
             return $"[{ string.Join(" ", node.Children.Select(Convert)) }][{ index }]";
         }
 
-        public override string VisitNote(NoteNode node, int index)
+        protected override string VisitNote(NoteNode node, int index)
         {
             return $"[{ index }] { Convert(node.Line) }";
         }

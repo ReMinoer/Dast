@@ -166,7 +166,14 @@ namespace Dast
 
     public abstract class MediaNodeBase : LeafNodeBase
     {
-        public string Extension { get; set; }
+        private string _extension;
+
+        public string Extension
+        {
+            get => _extension;
+            set => _extension = value ?? "";
+        }
+
         public string Content { get; set; }
         public MediaType? Type { get; set; }
     }

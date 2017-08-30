@@ -1,18 +1,17 @@
 ﻿using System.Collections.Generic;
-using Dast.Outputs.Html.Media.Base;
 
-namespace Dast.Outputs.Html.Media
+namespace Dast.Media.Html.Core
 {
-    public class YouTubeConverter : HtmlMediaConverterBase
+    public class YouTubeConverter : Contracts.Html.MediaOutputBase
     {
         public override string DisplayName => "YouTube videos";
         public override MediaType Type => MediaType.Visual;
 
-        public override IEnumerable<FileExtension> Extensions
+        public override IEnumerable<FileExtension> FileExtensions
         {
             get
             {
-                yield return FileExtensions.Video.YouTube;
+                yield return Dast.FileExtensions.Video.YouTube;
             }
         }
         

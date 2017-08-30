@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Dast.Extensibility\Dast.Extensibility.csproj" />
     <ProjectReference Include="..\..\Dast\Dast.csproj" />
+    <ProjectReference Include="..\..\Media\Dast.Media.Contracts\Dast.Media.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

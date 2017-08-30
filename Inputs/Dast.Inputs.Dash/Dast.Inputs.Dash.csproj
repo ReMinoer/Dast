@@ -9,8 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Dast.Extensibility\Dast.Extensibility.csproj" />
     <ProjectReference Include="..\..\Dast\Dast.csproj" />
     <ProjectReference Include="..\..\External\DashCSharp\DashCSharp\DashCSharp\DashCSharp.csproj" />
+    <ProjectReference Include="..\..\Media\Dast.Media.Contracts\Dast.Media.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

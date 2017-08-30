@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace Dast.Outputs.Html.Media.Base
+namespace Dast.Media.Contracts.Html
 {
-    public abstract class HtmlMediaConverterBase : HtmlOutput.IMediaOutput
+    public abstract class MediaOutputBase : IMediaOutput
     {
         public abstract string DisplayName { get; }
-        public abstract IEnumerable<FileExtension> Extensions { get; }
+        public abstract IEnumerable<FileExtension> FileExtensions { get; }
         public abstract MediaType Type { get; }
         public bool UseRecommandedCss { get; set; } = true;
 
@@ -13,7 +13,7 @@ namespace Dast.Outputs.Html.Media.Base
         public virtual string EndOfPage => null;
         public virtual string MandatoryCss => null;
         public virtual string RecommandedCss => null;
-        
+
         public abstract string Convert(string extension, string content, bool inline);
     }
 }

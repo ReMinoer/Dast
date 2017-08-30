@@ -10,7 +10,9 @@ namespace Dast.Outputs.Base
 
         public abstract string DisplayName { get; }
         public abstract FileExtension FileExtension { get; }
-        public ICollection<TMedia> MediaOutputs { get; } = new List<TMedia>();
+        public abstract IEnumerable<TMedia> MediaOutputs { get; }
+
+        IEnumerable<FileExtension> IFormat.FileExtensions { get { yield return FileExtension; } }
         IEnumerable<IMediaOutput> IDocumentOutput.MediaOutputs => MediaOutputs.Cast<IMediaOutput>();
 
         public string Convert(IDocumentNode node)
@@ -46,8 +48,8 @@ namespace Dast.Outputs.Base
         public abstract string VisitInternalLink(InternalLinkNode node);
         public abstract string VisitExternalLink(ExternalLinkNode node);
         public abstract string VisitAdress(AdressNode node);
-        public abstract string VisitReference(ReferenceNode node, int index);
-        public abstract string VisitNote(NoteNode node, int index);
+        protected abstract string VisitReference(ReferenceNode node, int index);
+        protected abstract string VisitNote(NoteNode node, int index);
         public abstract string VisitBold(BoldNode node);
         public abstract string VisitItalic(ItalicNode node);
         public abstract string VisitMark(MarkNode node);

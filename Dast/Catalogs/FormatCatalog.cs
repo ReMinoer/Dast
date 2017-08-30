@@ -3,34 +3,41 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace Dast
+namespace Dast.Catalogs
 {
-    public class DocumentFormatCatalog<TFormat> : ICollection<TFormat>
-        where TFormat : class, IDocumentFormat
+    public class FormatCatalog<TFormat> : ICollection<TFormat>
+        where TFormat : IFormat
     {
-        private readonly ICollection<TFormat> _collectionImplementation = new List<TFormat>();
+        private readonly ICollection<TFormat> _collection = new List<TFormat>();
         private readonly Dictionary<string, ICollection<TFormat>> _extensionDictionary = new Dictionary<string, ICollection<TFormat>>();
 
-        public int Count => _collectionImplementation.Count;
-        public bool IsReadOnly => _collectionImplementation.IsReadOnly;
+        public int Count => _collection.Count;
+        public bool IsReadOnly => _collection.IsReadOnly;
 
         public IReadOnlyCollection<TFormat> this[string extension] => new ReadOnlyCollection<TFormat>(_extensionDictionary[extension].ToArray());
 
         public TFormat BestMatch(string extension)
         {
             if (!_extensionDictionary.TryGetValue(extension, out ICollection<TFormat> extensionFormats))
-                return null;
+                return default(TFormat);
 
-            return extensionFormats.FirstOrDefault(x => x.FileExtension.MatchMain(extension)) ?? extensionFormats.First();
+            foreach (TFormat format in extensionFormats)
+                if (format.FileExtensions.Any(e => e.MatchMain(extension)))
+                    return format;
+
+            return extensionFormats.FirstOrDefault();
         }
 
         public void Add(TFormat item)
         {
-            _collectionImplementation.Add(item);
+            _collection.Add(item);
 
-            AddFormatExtension(item.FileExtension.Main, item);
-            foreach (string other in item.FileExtension.Others)
-                AddFormatExtension(other, item);
+            foreach (FileExtension fileExtension in item.FileExtensions)
+            {
+                AddFormatExtension(fileExtension.Main, item);
+                foreach (string other in fileExtension.Others)
+                    AddFormatExtension(other, item);
+            }
         }
 
         public void AddRange(IEnumerable<TFormat> enumerable)
@@ -48,12 +55,15 @@ namespace Dast
 
         public bool Remove(TFormat item)
         {
-            if (!_collectionImplementation.Remove(item))
+            if (!_collection.Remove(item))
                 return false;
 
-            RemoveFormatExtension(item.FileExtension.Main, item);
-            foreach (string other in item.FileExtension.Others)
-                RemoveFormatExtension(other, item);
+            foreach (FileExtension fileExtension in item.FileExtensions)
+            {
+                RemoveFormatExtension(fileExtension.Main, item);
+                foreach (string other in fileExtension.Others)
+                    RemoveFormatExtension(other, item);
+            }
 
             return true;
         }
@@ -69,21 +79,21 @@ namespace Dast
 
         public void Clear()
         {
-            _collectionImplementation.Clear();
+            _collection.Clear();
             _extensionDictionary.Clear();
         }
 
         public bool Contains(TFormat item)
         {
-            return _collectionImplementation.Contains(item);
+            return _collection.Contains(item);
         }
 
         public void CopyTo(TFormat[] array, int arrayIndex)
         {
-            _collectionImplementation.CopyTo(array, arrayIndex);
+            _collection.CopyTo(array, arrayIndex);
         }
 
-        public IEnumerator<TFormat> GetEnumerator() => _collectionImplementation.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_collectionImplementation).GetEnumerator();
+        public IEnumerator<TFormat> GetEnumerator() => _collection.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_collection).GetEnumerator();
     }
 }

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dast.Outputs.Html.Media.Base;
 
-namespace Dast.Outputs.Html.Media
+namespace Dast.Media.Html.Core
 {
-    public class CsvConverter : HtmlMediaConverterBase
+    public class CsvConverter : Contracts.Html.MediaOutputBase
     {
         private const string TableClass = "dast-csv-table";
 
@@ -13,11 +12,11 @@ namespace Dast.Outputs.Html.Media
         public override MediaType Type => MediaType.Visual;
         public override string RecommandedCss => $".{TableClass},.{TableClass} th,.{TableClass} td" + "{border:1px solid black;border-collapse:collapse;padding:5px;}";
 
-        public override IEnumerable<FileExtension> Extensions
+        public override IEnumerable<FileExtension> FileExtensions
         {
             get
             {
-                yield return FileExtensions.Data.Csv;
+                yield return Dast.FileExtensions.Data.Csv;
             }
         }
 

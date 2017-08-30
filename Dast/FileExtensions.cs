@@ -2,6 +2,8 @@
 {
     static public class FileExtensions
     {
+        static public FileExtension None => new FileExtension("", "");
+
         static public class Text
         {
             static public FileExtension Dash => new FileExtension("Dash", "dh", "dash");

@@ -12,9 +12,9 @@ namespace Dast.Outputs
         TOutput Convert(IDocumentNode node);
     }
 
-    public interface IDocumentOutput<TMedia, out TOutput> : IDocumentOutput<TOutput>
+    public interface IDocumentOutput<out TMedia, out TOutput> : IDocumentOutput<TOutput>
         where TMedia : IMediaOutput
     {
-        new ICollection<TMedia> MediaOutputs { get; }
+        new IEnumerable<TMedia> MediaOutputs { get; }
     }
 }

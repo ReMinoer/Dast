@@ -1,27 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dast.Extensibility;
 using Dast.Outputs.Base;
-using Dast.Outputs.Html.Media;
 
 namespace Dast.Outputs.Html
 {
-    public class HtmlOutput : DocumentOutputBase<HtmlOutput.IMediaOutput>
+    public class HtmlOutput : ExtensibleDocumentOutputBase<Media.Contracts.Html.IMediaOutput>
     {
-        public interface IMediaOutput : Outputs.IMediaOutput
-        {
-            string Head { get; }
-            string EndOfPage { get; }
-            string MandatoryCss { get; }
-            string RecommandedCss { get; }
-            bool UseRecommandedCss { get; set; }
-        }
-
         public override string DisplayName => "HTML";
         public override FileExtension FileExtension => FileExtensions.Programming.Html;
 
-        private readonly HashSet<IMediaOutput> _usedMediaConverters = new HashSet<IMediaOutput>();
-        public IMediaOutput DefaultConverter { get; set; } = new CodeConverter();
+        private readonly HashSet<Media.Contracts.Html.IMediaOutput> _usedMediaConverters = new HashSet<Media.Contracts.Html.IMediaOutput>();
 
         public override string VisitDocument(DocumentNode node)
         {
@@ -37,7 +27,7 @@ namespace Dast.Outputs.Html
                 result += Environment.NewLine + head;
 
             string css = "";
-            foreach (IMediaOutput converter in _usedMediaConverters)
+            foreach (Media.Contracts.Html.IMediaOutput converter in _usedMediaConverters)
             {
                 string converterCss = "";
                 if (!string.IsNullOrEmpty(converter.MandatoryCss))
@@ -116,12 +106,12 @@ namespace Dast.Outputs.Html
             return $"<span id=\"{ ToIdentifier(node.Names[0]) }\"></span>";
         }
 
-        public override string VisitReference(ReferenceNode node, int index)
+        protected override string VisitReference(ReferenceNode node, int index)
         {
             return $"<span class=\"dast-reference\">{ string.Join(" ", node.Children.Select(Convert)) }<sup><a href=\"#dast-note-{ index }\">{ index }</a></sup></span>";
         }
 
-        public override string VisitNote(NoteNode node, int index)
+        protected override string VisitNote(NoteNode node, int index)
         {
             return $"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. { string.Join(" ", node.Children.Select(Convert)) }</p>";
         }
@@ -168,20 +158,23 @@ namespace Dast.Outputs.Html
 
         private string VisitMediaBase(MediaNodeBase node, bool inline)
         {
-            IEnumerable<IMediaOutput> compatibtleConverters = MediaOutputs.Where(x => x.Extensions.Any(e => e.Match(node.Extension)));
+            IEnumerable<Media.Contracts.Html.IMediaOutput> compatibtleConverters = MediaOutputs.Where(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
 
-            IMediaOutput mediaConverter;
+            Media.Contracts.Html.IMediaOutput mediaConverter;
             if (node.Type.HasValue)
-            {
                 mediaConverter = MediaOutputs.FirstOrDefault(x => x.Type == node.Type.Value);
-                if (mediaConverter == null && DefaultConverter.Type == node.Type.Value)
-                    mediaConverter = DefaultConverter;
-            }
             else
-                mediaConverter = compatibtleConverters.FirstOrDefault() ?? DefaultConverter;
+                mediaConverter = compatibtleConverters.FirstOrDefault();
 
             if (mediaConverter == null)
+            {
+                if (node.Type == null || node.Type.Value == MediaType.Code)
+                    return inline
+                        ? $"<code>{node.Content}</code>"
+                        : $"<figure>{Environment.NewLine}<pre><code>{node.Content}</code></pre>{Environment.NewLine}</figure>";
+
                 return "";
+            }
 
             _usedMediaConverters.Add(mediaConverter);
             return mediaConverter.Convert(node.Extension, node.Content, inline);

@@ -1,24 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using Dast.Extensibility;
 using Dast.Outputs.Base;
-using Dast.Outputs.GitHubMarkdown.Media;
 
 namespace Dast.Outputs.GitHubMarkdown
 {
-    public class GitHubMardownOutput : DocumentOutputBase<GitHubMardownOutput.IMediaOutput>
+    public class GitHubMardownOutput : ExtensibleDocumentOutputBase<Media.Contracts.Markdown.IMediaOutput>
     {
-        public interface IMediaOutput : Outputs.IMediaOutput { }
-
         public override string DisplayName => "GitHub Markdown";
         public override FileExtension FileExtension => FileExtensions.Text.Markdown;
 
         private int _listLevel = -1;
-
-        public IEnumerable<IMediaOutput> MediaConverters { get; } = new IMediaOutput[]
-        {
-            new ImageConverter()
-        };
 
         public override string VisitDocument(DocumentNode node)
         {
@@ -76,12 +68,12 @@ namespace Dast.Outputs.GitHubMarkdown
             return $"<span id=\"{ ToHtmlIdentifier(node.Names[0]) }\"></span>";
         }
 
-        public override string VisitReference(ReferenceNode node, int index)
+        protected override string VisitReference(ReferenceNode node, int index)
         {
             return $"<span class=\"dast-reference\">{ string.Join(" ", node.Children.Select(Convert)) }<sup><a href=\"#dast-note-{ index }\">{ index }</a></sup></span>";
         }
 
-        public override string VisitNote(NoteNode node, int index)
+        protected override string VisitNote(NoteNode node, int index)
         {
             return $"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. { string.Join(" ", node.Children.Select(Convert)) }</p>{ Environment.NewLine }";
         }
@@ -129,12 +121,12 @@ namespace Dast.Outputs.GitHubMarkdown
         private string VisitMediaBase(MediaNodeBase node, bool inline)
         {
             MediaType type;
-            IMediaOutput mediaConverter = null;
+            Media.Contracts.Markdown.IMediaOutput mediaConverter = null;
             if (node.Type.HasValue)
                 type = node.Type.Value;
             else
             {
-                mediaConverter = MediaConverters.FirstOrDefault(x => x.Extensions.Any(e => e.Match(node.Extension)));
+                mediaConverter = MediaOutputs.FirstOrDefault(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
                 type = mediaConverter?.Type ?? MediaType.Code;
             }
 
@@ -145,7 +137,7 @@ namespace Dast.Outputs.GitHubMarkdown
                 case MediaType.Visual:
                     if (mediaConverter == null)
                     {
-                        mediaConverter = MediaConverters.FirstOrDefault(x => x.Extensions.Any(e => e.Match(node.Extension)));
+                        mediaConverter = MediaOutputs.FirstOrDefault(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
                         if (mediaConverter == null)
                             return "";
                     }
