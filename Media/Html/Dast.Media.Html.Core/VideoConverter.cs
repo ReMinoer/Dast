@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using Dast.Media.Contracts.Html;
 
 namespace Dast.Media.Html.Core
 {
-    public class VideoConverter : Contracts.Html.MediaOutputBase
+    public class VideoConverter : HtmlMediaOutputBase
     {
         public override string DisplayName => "HTML videos";
         public override MediaType Type => MediaType.Visual;

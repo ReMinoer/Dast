@@ -5,7 +5,7 @@ using Dast.Outputs.Base;
 
 namespace Dast.Outputs.GitHubMarkdown
 {
-    public class GitHubMardownOutput : ExtensibleDocumentOutputBase<Media.Contracts.Markdown.IMediaOutput>
+    public class GitHubMardownOutput : ExtensibleDocumentOutputBase<Media.Contracts.Markdown.IMarkdownMediaOutput>
     {
         public override string DisplayName => "GitHub Markdown";
         public override FileExtension FileExtension => FileExtensions.Text.Markdown;
@@ -121,7 +121,7 @@ namespace Dast.Outputs.GitHubMarkdown
         private string VisitMediaBase(MediaNodeBase node, bool inline)
         {
             MediaType type;
-            Media.Contracts.Markdown.IMediaOutput mediaConverter = null;
+            Media.Contracts.Markdown.IMarkdownMediaOutput mediaConverter = null;
             if (node.Type.HasValue)
                 type = node.Type.Value;
             else

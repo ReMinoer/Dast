@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Dast.Media.Contracts.Markdown;
 
 namespace Dast.Media.Markdown.Core
 {
-    public class ImageConverter : Contracts.Markdown.IMediaOutput
+    public class ImageConverter : IMarkdownMediaOutput
     {
         public string DisplayName => "Markdown images";
         public MediaType Type => MediaType.Visual;

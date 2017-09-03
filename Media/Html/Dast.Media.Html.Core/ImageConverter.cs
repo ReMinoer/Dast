@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Dast.Media.Contracts.Html;
 
 namespace Dast.Media.Html.Core
 {
-    public class ImageConverter : Contracts.Html.MediaOutputBase
+    public class ImageConverter : HtmlMediaOutputBase
     {
         public override string DisplayName => "HTML images";
         public override MediaType Type => MediaType.Visual;

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dast.Media.Contracts.Html;
 
 namespace Dast.Media.Html.Core
 {
-    public class CsvConverter : Contracts.Html.MediaOutputBase
+    public class CsvConverter : HtmlMediaOutputBase
     {
         private const string TableClass = "dast-csv-table";
 

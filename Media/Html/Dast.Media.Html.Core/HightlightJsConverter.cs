@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dast.Media.Contracts.Html;
 
 namespace Dast.Media.Html.Core
 {
-    public class HightlightJsConverter : Contracts.Html.MediaOutputBase
+    public class HightlightJsConverter : HtmlMediaOutputBase
     {
         private const string InlineCodeClass = "dast-hljs-inline";
 

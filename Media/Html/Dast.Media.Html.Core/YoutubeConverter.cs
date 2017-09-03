@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using Dast.Media.Contracts.Html;
 
 namespace Dast.Media.Html.Core
 {
-    public class YouTubeConverter : Contracts.Html.MediaOutputBase
+    public class YouTubeConverter : HtmlMediaOutputBase
     {
         public override string DisplayName => "YouTube videos";
         public override MediaType Type => MediaType.Visual;

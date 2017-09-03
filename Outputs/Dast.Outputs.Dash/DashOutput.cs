@@ -5,7 +5,7 @@ using Dast.Outputs.Base;
 
 namespace Dast.Outputs.Dash
 {
-    public class DashOutput : ExtensibleDocumentOutputBase<Media.Contracts.Dash.IMediaOutput>
+    public class DashOutput : ExtensibleDocumentOutputBase<Media.Contracts.Dash.IDashMediaOutput>
     {
         public override string DisplayName => "Dash";
         public override FileExtension FileExtension => FileExtensions.Text.Dash;

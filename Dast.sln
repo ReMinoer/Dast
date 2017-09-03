@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast", "Dast\Dast.csproj", "{D76A0B3B-5C48-447B-ACB9-4E710689FAEA}"
 EndProject
@@ -46,7 +46,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Media.Contracts", "Med
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Media.Markdown.Core", "Media\Markdown\Dast.Media.Markdown.Core\Dast.Media.Markdown.Core.csproj", "{BAEE90F2-379D-4498-99EF-13AA269958B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dast.Extensibility", "Dast.Extensibility\Dast.Extensibility.csproj", "{A21C97C2-EB2E-487F-9727-4ABD7F625FF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dast.Extensibility", "Dast.Extensibility\Dast.Extensibility.csproj", "{A21C97C2-EB2E-487F-9727-4ABD7F625FF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -127,6 +127,7 @@ Global
 		{6778C58E-4196-4154-8D8D-49BB9D25D92F} = {A26EA4A8-2D7B-49D8-89B0-1C8F251A9754}
 		{8CDD4FCD-3743-4C73-948F-13D28CE069D5} = {A26EA4A8-2D7B-49D8-89B0-1C8F251A9754}
 		{34131AB5-5905-4002-8FD9-6A1835BF331D} = {6778C58E-4196-4154-8D8D-49BB9D25D92F}
+		{D7A0DCD9-41C4-4C8D-B2FB-D9A7972582A2} = {A26EA4A8-2D7B-49D8-89B0-1C8F251A9754}
 		{BAEE90F2-379D-4498-99EF-13AA269958B1} = {8CDD4FCD-3743-4C73-948F-13D28CE069D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

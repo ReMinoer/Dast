@@ -6,12 +6,12 @@ using Dast.Outputs.Base;
 
 namespace Dast.Outputs.Html
 {
-    public class HtmlOutput : ExtensibleDocumentOutputBase<Media.Contracts.Html.IMediaOutput>
+    public class HtmlOutput : ExtensibleDocumentOutputBase<Media.Contracts.Html.IHtmlMediaOutput>
     {
         public override string DisplayName => "HTML";
         public override FileExtension FileExtension => FileExtensions.Programming.Html;
 
-        private readonly HashSet<Media.Contracts.Html.IMediaOutput> _usedMediaConverters = new HashSet<Media.Contracts.Html.IMediaOutput>();
+        private readonly HashSet<Media.Contracts.Html.IHtmlMediaOutput> _usedMediaConverters = new HashSet<Media.Contracts.Html.IHtmlMediaOutput>();
 
         public override string VisitDocument(DocumentNode node)
         {
@@ -27,7 +27,7 @@ namespace Dast.Outputs.Html
                 result += Environment.NewLine + head;
 
             string css = "";
-            foreach (Media.Contracts.Html.IMediaOutput converter in _usedMediaConverters)
+            foreach (Media.Contracts.Html.IHtmlMediaOutput converter in _usedMediaConverters)
             {
                 string converterCss = "";
                 if (!string.IsNullOrEmpty(converter.MandatoryCss))
@@ -158,9 +158,9 @@ namespace Dast.Outputs.Html
 
         private string VisitMediaBase(MediaNodeBase node, bool inline)
         {
-            IEnumerable<Media.Contracts.Html.IMediaOutput> compatibtleConverters = MediaOutputs.Where(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
+            IEnumerable<Media.Contracts.Html.IHtmlMediaOutput> compatibtleConverters = MediaOutputs.Where(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
 
-            Media.Contracts.Html.IMediaOutput mediaConverter;
+            Media.Contracts.Html.IHtmlMediaOutput mediaConverter;
             if (node.Type.HasValue)
                 mediaConverter = MediaOutputs.FirstOrDefault(x => x.Type == node.Type.Value);
             else

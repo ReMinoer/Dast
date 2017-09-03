@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Dast.Media.Contracts.Html
 {
-    public abstract class MediaOutputBase : IMediaOutput
+    public abstract class HtmlMediaOutputBase : IHtmlMediaOutput
     {
         public abstract string DisplayName { get; }
         public abstract IEnumerable<FileExtension> FileExtensions { get; }
