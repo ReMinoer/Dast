@@ -33,6 +33,30 @@ namespace Dast
             return Others.Any(x => x.Equals(extension, StringComparison.OrdinalIgnoreCase));
         }
 
+        public bool Equals(FileExtension other)
+        {
+            return string.Equals(Name, other.Name) && string.Equals(Main, other.Main) && Equals(Others, other.Others);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+
+            return obj is FileExtension extension && Equals(extension);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = Name != null ? Name.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ (Main != null ? Main.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Others != null ? Others.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
         static public bool operator==(FileExtension a, FileExtension b)
         {
             return a.Equals(b);
