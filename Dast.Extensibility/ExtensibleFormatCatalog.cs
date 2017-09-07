@@ -1,23 +1,24 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Composition;
+using System.Linq;
 using Dast.Catalogs;
 
 namespace Dast.Extensibility
 {
-    public class ExtensibleFormatCatalog<TFormat> : FormatCatalog<TFormat>, IExtensible
+    public class ExtensibleFormatCatalog<TFormat> : FormatCatalog<TFormat>, IExtensible<TFormat>
         where TFormat : IFormat
     {
-        public IEnumerable<Type> ExtensionTypes { get { yield return typeof(TFormat); } }
+        ICollection<TFormat> IExtensible<TFormat>.Extensions => this;
 
-        public void Extend(CompositionContext context)
+        public IEnumerable<TFormat> Extend(CompositionContext context)
         {
-            AddRange(context.GetExports<TFormat>());
+            TFormat[] extensions = context.GetExports<TFormat>().ToArray();
+            AddRange(extensions);
+            return extensions;
         }
 
-        public void ResetToVanilla()
-        {
-            Clear();
-        }
+        IEnumerable IExtensible.Extend(CompositionContext context) => Extend(context);
+        public void ResetToVanilla() => Clear();
     }
 }

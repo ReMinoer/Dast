@@ -10,9 +10,10 @@ namespace Dast.Outputs.Base
 
         public abstract string DisplayName { get; }
         public abstract FileExtension FileExtension { get; }
-        public abstract IEnumerable<TMedia> MediaOutputs { get; }
-
+        protected abstract IEnumerable<TMedia> MediaOutputs { get; }
+        
         IEnumerable<FileExtension> IFormat.FileExtensions { get { yield return FileExtension; } }
+        IEnumerable<TMedia> IDocumentOutput<TMedia, string>.MediaOutputs => MediaOutputs;
         IEnumerable<IMediaOutput> IDocumentOutput.MediaOutputs => MediaOutputs.Cast<IMediaOutput>();
 
         public string Convert(IDocumentNode node)

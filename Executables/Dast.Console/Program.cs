@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Composition.Convention;
-using System.Composition.Hosting;
 using System.Reflection;
 using System.Runtime.Loader;
-using Dast.Catalogs;
 using Dast.Extensibility;
-using Dast.Inputs;
-using Dast.Outputs;
 
 namespace Dast.Console
 {
@@ -91,84 +85,23 @@ namespace Dast.Console
                     {
                         try
                         {
-                            Assembly assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath);
-                            assemblies.Add(assembly);
+                            assemblies.Add(AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath));
                         }
-                        catch (FileLoadException)
-                        {
-                        }
-                    }
+                        catch (FileLoadException) { }
+                }
                 }
             }
 #endif
+            var converter = new ExtensibleDastConverter<string, string>();
+            ExtensionsLoader.FromAssemblies(assemblies, converter);
 
-            var documentConventionBuilder = new ConventionBuilder();
-            documentConventionBuilder.ForTypesDerivedFrom<IDocumentInput<string>>().Export<IDocumentInput<string>>();
-            documentConventionBuilder.ForTypesDerivedFrom<IDocumentOutput<string>>().Export<IDocumentOutput<string>>();
-
-            ContainerConfiguration documentContainerConfiguration = new ContainerConfiguration().WithAssemblies(assemblies, documentConventionBuilder);
-
-            var inputCatalog = new FormatCatalog<IDocumentInput<string>>();
-            var outputCatalog = new FormatCatalog<IDocumentOutput<string>>();
-
-            using (CompositionHost documentContainer = documentContainerConfiguration.CreateContainer())
+            string inputExtension = file.Extension.TrimStart('.');
+            string content = File.ReadAllText(file.FullName);
+            
+            foreach ((FileExtension extension, string result) output in converter.Convert(inputExtension, content, outputExtensions))
             {
-                IDocumentInput<string>[] documentInputs = documentContainer.GetExports<IDocumentInput<string>>().ToArray();
-                if (documentInputs.Length == 0)
-                {
-                    System.Console.WriteLine("Error: No input format available !");
-                    return false;
-                }
-
-                IDocumentOutput<string>[] documentOutputs = documentContainer.GetExports<IDocumentOutput<string>>().ToArray();
-                if (documentOutputs.Length == 0)
-                {
-                    System.Console.WriteLine("Error: No output format available !");
-                    return false;
-                }
-
-                inputCatalog.AddRange(documentInputs);
-                outputCatalog.AddRange(documentOutputs);
-
-                foreach (IExtensible extensibleDocumentFormat in Enumerable.Concat(inputCatalog.OfType<IExtensible>(), outputCatalog.OfType<IExtensible>()))
-                {
-                    var mediaConventionBuilder = new ConventionBuilder();
-                    foreach (Type extensionType in extensibleDocumentFormat.ExtensionTypes)
-                        mediaConventionBuilder.ForTypesDerivedFrom(extensionType).Export(x => x.AsContractType(extensionType));
-
-                    ContainerConfiguration mediaContainerConfiguration = new ContainerConfiguration().WithAssemblies(assemblies, mediaConventionBuilder);
-                    using (CompositionHost mediaContainer = mediaContainerConfiguration.CreateContainer())
-                        extensibleDocumentFormat.Extend(mediaContainer);
-                }
-            }
-
-            IDocumentInput<string> input = inputCatalog.BestMatch(file.Extension.TrimStart('.'));
-
-            if (input == null)
-            {
-                System.Console.WriteLine("Error: No input format can handle that file extension !");
-                return false;
-            }
-
-            var outputs = new List<IDocumentOutput<string>>();
-            foreach (string outputExtension in outputExtensions)
-            {
-                IDocumentOutput<string> output = outputCatalog.BestMatch(outputExtension);
-
-                if (output == null)
-                {
-                    System.Console.WriteLine($"Warning: \".{outputExtension}\" extension not find in output format catalog !");
-                    continue;
-                }
-
-                outputs.Add(output);
-            }
-
-            IDocumentNode document = input.Convert(File.ReadAllText(file.FullName));
-            foreach (IDocumentOutput<string> output in outputs)
-            {
-                System.Console.WriteLine($"Converting to {output.DisplayName}...");
-                File.WriteAllText(Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, output.FileExtension.Main)), output.Convert(document));
+                string outputFile = Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, output.extension.Main));
+                File.WriteAllText(outputFile, output.result);
             }
 
             return true;

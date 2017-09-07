@@ -21,7 +21,7 @@ namespace Dast.Media.Html.Core
         {
             get
             {
-                yield return Dast.FileExtensions.None;
+                yield return FileExtension.Unknown;
                 yield return Dast.FileExtensions.Text.Markdown;
                 yield return Dast.FileExtensions.Text.Dash;
                 yield return Dast.FileExtensions.Programming.Csharp;

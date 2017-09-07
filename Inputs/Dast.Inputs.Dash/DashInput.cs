@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Composition;
 using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using DashCSharp;
-using Dast.Catalogs;
 using Dast.Extensibility;
+using Dast.Media.Contracts.Dash;
 using Dast.Outputs.Base;
 
 namespace Dast.Inputs.Dash
 {
-    public class DashInput : DashParserBaseVisitor<IDocumentNode>, IExtensibleDocumentInput<Media.Contracts.Dash.IDashMediaInput, string>
+    public class DashInput : DashParserBaseVisitor<IDocumentNode>, IDocumentInput<IDashMediaInput, string>, IExtensible<IDashMediaInput>
     {
         public string DisplayName => "Dash";
         public FileExtension FileExtension => Dast.FileExtensions.Text.Dash;
@@ -25,22 +26,14 @@ namespace Dast.Inputs.Dash
         private readonly Dictionary<InternalLinkNode, string> _unresolvedLinks = new Dictionary<InternalLinkNode, string>();
         private readonly Dictionary<string, AdressNode> _adresses = new Dictionary<string, AdressNode>();
 
-        private readonly ExtensibleFormatCatalog<Media.Contracts.Dash.IDashMediaInput> _mediaCatalog = new ExtensibleFormatCatalog<Media.Contracts.Dash.IDashMediaInput>();
-        private readonly IReadOnlyCollection<Media.Contracts.Dash.IDashMediaInput> _readOnlyCollection;
+        public ExtensibleFormatCatalog<IDashMediaInput> MediaCatalog { get; } = new ExtensibleFormatCatalog<IDashMediaInput>();
+        IEnumerable<IMediaInput> IDocumentInput.MediaInputs => MediaCatalog;
+        IEnumerable<IDashMediaInput> IDocumentInput<IDashMediaInput, string>.MediaInputs => MediaCatalog;
 
-        IEnumerable<IMediaInput> IDocumentInput.MediaInputs => _readOnlyCollection;
-        IReadOnlyCollection<IMediaInput> IExtensibleDocumentInput.MediaInputs => _readOnlyCollection;
-        IEnumerable<Media.Contracts.Dash.IDashMediaInput> IDocumentInput<Media.Contracts.Dash.IDashMediaInput, string>.MediaInputs => _readOnlyCollection;
-        public ICollection<Media.Contracts.Dash.IDashMediaInput> MediaInputs => _mediaCatalog;
-
-        public IEnumerable<Type> ExtensionTypes => _mediaCatalog.ExtensionTypes;
-        public void Extend(CompositionContext context) => _mediaCatalog.Extend(context);
-        public void ResetToVanilla() => _mediaCatalog.ResetToVanilla();
-
-        public DashInput()
-        {
-            _readOnlyCollection = new ReadOnlyFormatCatalog<Media.Contracts.Dash.IDashMediaInput>(_mediaCatalog);
-        }
+        public IEnumerable<IDashMediaInput> Extend(CompositionContext context) => MediaCatalog.Extend(context);
+        public void ResetToVanilla() => MediaCatalog.ResetToVanilla();
+        public ICollection<IDashMediaInput> Extensions => MediaCatalog;
+        IEnumerable IExtensible.Extend(CompositionContext context) => Extend(context);
 
         public IDocumentNode Convert(string input)
         {

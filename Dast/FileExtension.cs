@@ -5,6 +5,8 @@ namespace Dast
 {
     public struct FileExtension
     {
+        static public FileExtension Unknown => new FileExtension("", "");
+
         public readonly string Name;
         public readonly string Main;
         public readonly string[] Others;
@@ -29,6 +31,16 @@ namespace Dast
         public bool MatchOthers(string extension)
         {
             return Others.Any(x => x.Equals(extension, StringComparison.OrdinalIgnoreCase));
+        }
+
+        static public bool operator==(FileExtension a, FileExtension b)
+        {
+            return a.Equals(b);
+        }
+
+        static public bool operator!=(FileExtension a, FileExtension b)
+        {
+            return !(a == b);
         }
     }
 }
