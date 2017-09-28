@@ -11,7 +11,7 @@ namespace Dast.Media.Html.Core
 
         public override string DisplayName => "highlight.js";
         public override MediaType Type => MediaType.Code;
-        public override string MandatoryCss => $".{InlineCodeClass}" + "{display:inline;}";
+        public override string MandatoryCss => $".{InlineCodeClass}" + "{display:inline !important;}";
 
         public override string Head => "<link rel=\"stylesheet\" href=\"http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css\">" + Environment.NewLine
                               + "<script src=\"http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js\"></script>" + Environment.NewLine
@@ -36,7 +36,7 @@ namespace Dast.Media.Html.Core
             string caption = string.IsNullOrWhiteSpace(languageName) ? extension : languageName;
 
             if (inline)
-                return $"<code class=\"{InlineCodeClass} {languageClass}\">" + content + "</code>";
+                return $"<code class=\"{languageClass} {InlineCodeClass}\">" + content + "</code>";
 
             string result = "";
             if (!string.IsNullOrWhiteSpace(caption))

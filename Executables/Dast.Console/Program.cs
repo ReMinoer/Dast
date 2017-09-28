@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +32,7 @@ namespace Dast.Console
             if (args.Length == 0)
             {
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
-                args = new[] { "../../../../../External/DashCSharp/External/Dash/doc.dh", "md", "html" };
+                args = new[] { "../../../../../External/DashCSharp/External/Dash/doc.dh", "md", "html", "dh" };
             }
 #endif
 
@@ -39,9 +40,7 @@ namespace Dast.Console
             {
                 System.Console.WriteLine("Error: Not enough arguments !");
                 System.Console.WriteLine("Usage: Dast.Console.exe <filePath> <outputExtension>+");
-                System.Console.WriteLine("Press any key to quit...");
-                System.Console.ReadKey();
-                return;
+                goto PressAnyKey;
             }
 
             string filePath = args[0];
@@ -50,13 +49,13 @@ namespace Dast.Console
             if (Process(filePath, outputExtensions))
                 return;
 
+        PressAnyKey:
             System.Console.WriteLine("Press any key to quit...");
             System.Console.ReadKey();
         }
 
         static private bool Process(string filePath, IEnumerable<string> outputExtensions)
         {
-            string executableDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             string workingDirectory = Directory.GetCurrentDirectory();
 
             string rootedFilePath = Path.IsPathRooted(filePath) ? filePath : Path.Combine(workingDirectory, filePath);
@@ -66,6 +65,30 @@ namespace Dast.Console
                 System.Console.WriteLine($"Error: {file.FullName} not found !");
                 return false;
             }
+
+            string inputExtension = file.Extension.TrimStart('.');
+            string content = File.ReadAllText(file.FullName);
+
+            var converter = new ExtensibleDastConverter<string, string>();
+            ExtensionsLoader.FromAssemblies(GetAssemblies(), converter);
+            
+            Stopwatch stopWatch = Stopwatch.StartNew();
+
+            foreach ((FileExtension extension, string result) output in converter.Convert(inputExtension, content, outputExtensions))
+            {
+                string outputFile = Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, output.extension.Main));
+                File.WriteAllText(outputFile, output.result);
+            }
+
+            stopWatch.Stop();
+            System.Console.WriteLine(stopWatch.Elapsed.TotalSeconds);
+
+            return true;
+        }
+
+        static private IEnumerable<Assembly> GetAssemblies()
+        {
+            string executableDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
 #if !DEBUG
             string pluginsPath = Path.Combine(executableDirectory, PluginsDirectory);
@@ -88,23 +111,11 @@ namespace Dast.Console
                             assemblies.Add(AssemblyLoadContext.Default.LoadFromAssemblyPath(dllPath));
                         }
                         catch (FileLoadException) { }
-                }
+                    }
                 }
             }
 #endif
-            var converter = new ExtensibleDastConverter<string, string>();
-            ExtensionsLoader.FromAssemblies(assemblies, converter);
-
-            string inputExtension = file.Extension.TrimStart('.');
-            string content = File.ReadAllText(file.FullName);
-            
-            foreach ((FileExtension extension, string result) output in converter.Convert(inputExtension, content, outputExtensions))
-            {
-                string outputFile = Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, output.extension.Main));
-                File.WriteAllText(outputFile, output.result);
-            }
-
-            return true;
+            return assemblies;
         }
     }
 }

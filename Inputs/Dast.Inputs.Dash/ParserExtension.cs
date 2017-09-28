@@ -20,6 +20,8 @@ namespace Dast.Inputs.Dash
             }
             catch (ParseCanceledException)
             {
+                parser.Reset();
+
                 parser.Interpreter.PredictionMode = PredictionMode.Ll;
                 parser.ErrorHandler = new DefaultErrorStrategy();
                 context = func(parser);

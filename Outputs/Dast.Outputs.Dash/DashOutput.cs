@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using Dast.Extensibility;
+using Dast.Extensibility.Outputs;
 using Dast.Outputs.Base;
 
 namespace Dast.Outputs.Dash
 {
-    public class DashOutput : ExtensibleDocumentOutputBase<Media.Contracts.Dash.IDashMediaOutput>
+    public class DashOutput : ExtensibleDocumentWriterBase<Media.Contracts.Dash.IDashMediaOutput>
     {
         public override string DisplayName => "Dash";
         public override FileExtension FileExtension => FileExtensions.Text.Dash;
@@ -13,135 +13,193 @@ namespace Dast.Outputs.Dash
         private int _listLevel = -1;
         public int RecommendedLineSize { get; set; } = 100;
 
-        public override string VisitDocument(DocumentNode node)
+        public override void VisitDocument(DocumentNode node)
         {
-            return string.Join(Environment.NewLine, node.Children.Select(Convert));
+            Aggregate("<> ", node.MainTitles);
+            WriteLine();
+
+            JoinChildren(node, NewLine);
         }
 
-        public override string VisitParagraph(ParagraphNode node)
+        public override void VisitParagraph(ParagraphNode node)
         {
-            string content = node.Children.Aggregate(Convert);
-            if (node.Class == null)
-                return content;
+            StartDump();
+            AggregateChildren(node);
+            string content = StopDump();
 
-            string header = "< " + node.Class + " >";
-            if (header.HasMultipleLine() || header.Length > RecommendedLineSize)
-                header += Environment.NewLine;
+            if (!string.IsNullOrEmpty(node.Class))
+            {
+                Write("< ", node.Class, " >");
+
+                if (content.HasMultipleLine() || content.Length > RecommendedLineSize)
+                    WriteLine();
+                else
+                    Write(" ");
+            }
+
+            Write(content);
+        }
+
+        public override void VisitTitle(TitleNode node)
+        {
+            Write("<", new string('-', node.Level), ">");
+
+            StartDump();
+            AggregateChildren(node);
+            string content = StopDump();
+
+            if (content.HasMultipleLine() || content.Length > RecommendedLineSize)
+                WriteLine();
             else
-                header += " ";
+                Write(" ");
 
-            return header + content;
+            Write(content);
         }
 
-        public override string VisitTitle(TitleNode node)
-        {
-            string content = node.Children.Aggregate(Convert);
-            string header = "<" + new string('-', node.Level) + ">";
-            if (header.HasMultipleLine() || header.Length > RecommendedLineSize)
-                header += Environment.NewLine;
-            else
-                header += " ";
-
-            return header + content;
-        }
-
-        public override string VisitList(ListNode node)
+        public override void VisitList(ListNode node)
         {
             _listLevel++;
-            string result = node.Children.Select((item, i) => new string(' ', 4 * _listLevel) + (node.Ordered ? (i + 1).ToString() : "") + "- " + Convert(item)).Aggregate();
+            AggregateChildren(i => new string(' ', 4 * _listLevel) + (node.Ordered ? (i + 1).ToString() : "") + "- ", node);
             _listLevel--;
-            return result;
         }
 
-        public override string VisitListItem(ListItemNode node)
+        public override void VisitListItem(ListItemNode node)
         {
-            return Convert(node.Line) + Convert(node.Sublist);
+            Write(node.Line);
+            if (node.Sublist != null)
+                Write(node.Sublist);
         }
 
-        public override string VisitLine(LineNode node)
+        public override void VisitLine(LineNode node)
         {
-            return string.Join(" ", node.Children.Select(Convert)) + Environment.NewLine;
+            JoinChildren(node, " ");
+            WriteLine();
         }
 
-        public override string VisitInternalLink(InternalLinkNode node)
+        public override void VisitInternalLink(InternalLinkNode node)
         {
+            string adress = node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "";
+
             if (node.Children.Count == 1 && node.Children[0] is TextNode textNode
                 && (node.AdressNode != null && node.AdressNode.Names.Any(x => x.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
-                    || node.AdressByDefault.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase)))
-                return $"[[{ node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "" }]]";
-
-            return $"[{ string.Join(" ", node.Children.Select(Convert)) }][{ node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "" }]";
+                || node.AdressByDefault.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase)))
+            {
+                Write("[[", adress, "]]");
+            }
+            else
+            {
+                Write("[");
+                JoinChildren(node, " ");
+                Write("][", adress, "]");
+            }
         }
 
-        public override string VisitExternalLink(ExternalLinkNode node)
+        public override void VisitExternalLink(ExternalLinkNode node)
         {
             if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && node.Adress.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
-                return $"[[{ node.Adress }]]";
-
-            return $"[{ string.Join(" ", node.Children.Select(Convert)) }][{ node.Adress }]";
+            {
+                Write("[[", node.Adress, "]]");
+            }
+            else
+            {
+                Write("[");
+                JoinChildren(node, " ");
+                Write("][", node.Adress, "]");
+            }
         }
 
-        public override string VisitAdress(AdressNode node)
+        public override void VisitAdress(AdressNode node)
         {
-            return $"@[{ string.Join("|", node.Names) }]";
+            Write("@[", string.Join("|", node.Names), "]");
         }
 
-        protected override string VisitReference(ReferenceNode node, int index)
+        protected override void VisitReference(ReferenceNode node, int index)
         {
-            return $"[{ string.Join(" ", node.Children.Select(Convert)) }][{ index }]";
+            Write("[");
+            JoinChildren(node, " ");
+            Write("][", index.ToString(), "]");
         }
 
-        protected override string VisitNote(NoteNode node, int index)
+        protected override void VisitNote(NoteNode node, int index)
         {
-            return $"[{ index }] { Convert(node.Line) }";
+            Write("[", index.ToString(), "] ");
+            Write(node.Line);
         }
 
-        public override string VisitBold(BoldNode node)
+        public override void VisitBold(BoldNode node)
         {
-            return "*[" + string.Join(" ", node.Children.Select(Convert)) + "]";
+            Write("*[");
+            JoinChildren(node, " ");
+            Write("]");
         }
 
-        public override string VisitItalic(ItalicNode node)
+        public override void VisitItalic(ItalicNode node)
         {
-            return "/[" + string.Join(" ", node.Children.Select(Convert)) + "]";
+            Write("/[");
+            JoinChildren(node, " ");
+            Write("]");
         }
 
-        public override string VisitMark(MarkNode node)
+        public override void VisitMark(MarkNode node)
         {
-            return "=[" + string.Join(" ", node.Children.Select(Convert)) + "]";
+            Write("=[");
+            JoinChildren(node, " ");
+            Write("]");
         }
 
-        public override string VisitObsolete(ObsoleteNode node)
+        public override void VisitObsolete(ObsoleteNode node)
         {
-            return "~[" + string.Join(" ", node.Children.Select(Convert)) + "]";
+            Write("~[");
+            JoinChildren(node, " ");
+            Write("]");
         }
 
-        public override string VisitEmphasis(EmphasisNode node)
+        public override void VisitEmphasis(EmphasisNode node)
         {
-            return (node.Class != null ? $"<{node.Class}>" : "") + "[" + string.Join(" ", node.Children.Select(Convert)) + "]";
+            if (!string.IsNullOrEmpty(node.Class))
+                Write("<", node.Class, ">");
+
+            Write("[");
+            JoinChildren(node, " ");
+            Write("]");
         }
 
-        public override string VisitText(TextNode textNode)
+        public override void VisitText(TextNode textNode)
         {
-            return textNode.Content;
+            Write(textNode.Content);
         }
 
-        public override string VisitMedia(MediaNode node)
+        public override void VisitMedia(MediaNode node)
         {
-            return $"<< .{node.Extension} >>" + Environment.NewLine + node.Content + Environment.NewLine + "<...>";
+            WriteLine("<< .", node.Extension, " >>");
+            WriteLine();
+            WriteLine(node.Content);
+            WriteLine();
+            WriteLine("<...>");
         }
 
-        public override string VisitMediaInline(MediaInlineNode node)
+        public override void VisitMediaInline(MediaInlineNode node)
         {
-            return (node.Extension != null ? $"< .{node.Extension} >" : "") + "{ " + node.Content + " }";
+            if (!string.IsNullOrEmpty(node.Extension))
+                Write("< .", node.Extension, ">");
+
+            Write("{ ", node.Content, " }");
         }
 
-        public override string VisitComment(CommentNode node)
+        public override void VisitComment(CommentNode node)
         {
-            return "~~"
-                + (node.Inline ? " " : "~~" + Environment.NewLine)
-                + node.Content
-                + (node.Inline ? "" : Environment.NewLine + "~~~~");
+            if (node.Inline)
+                Write("~~ ");
+            else
+                WriteLine("~~~~");
+
+            Write(node.Content);
+
+            if (node.Inline)
+                return;
+
+            WriteLine();
+            WriteLine("~~~~");
         }
     }
 }

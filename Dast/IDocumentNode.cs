@@ -6,7 +6,7 @@ namespace Dast
 {
     public interface IDocumentNode
     {
-        string Accept(IDocumentVisitor visitor);
+        void Accept(IDocumentVisitor visitor);
         IEnumerable<IDocumentNode> Children { get; }
     }
 
@@ -19,7 +19,7 @@ namespace Dast
     public abstract class LeafNodeBase : IDocumentNode
     {
         public IEnumerable<IDocumentNode> Children { get { yield break; } }
-        public abstract string Accept(IDocumentVisitor visitor);
+        public abstract void Accept(IDocumentVisitor visitor);
     }
 
     public abstract class ParentNodeBase<TChild> : IDocumentNode<TChild>
@@ -35,7 +35,7 @@ namespace Dast
             _readOnlyChildren = new ReadOnlyCollection<TChild>(Children);
         }
 
-        public abstract string Accept(IDocumentVisitor visitor);
+        public abstract void Accept(IDocumentVisitor visitor);
     }
 
     public class DocumentNode : ParentNodeBase<DocumentNode.IChild>
@@ -43,7 +43,7 @@ namespace Dast
         public List<LineNode> MainTitles { get; } = new List<LineNode>();
 
         public interface IChild : IDocumentNode { }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitDocument(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitDocument(this);
     }
 
     public class ParagraphNode : ParentNodeBase<ParagraphNode.IChild>, DocumentNode.IChild
@@ -51,7 +51,7 @@ namespace Dast
         public string Class { get; set; }
 
         public interface IChild : IDocumentNode { }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitParagraph(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitParagraph(this);
     }
 
     public class TitleNode : ParentNodeBase<TitleNode.IChild>, DocumentNode.IChild
@@ -59,7 +59,7 @@ namespace Dast
         public int Level { get; set; }
 
         public interface IChild : IDocumentNode { }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitTitle(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitTitle(this);
     }
 
     public class ListNode : ParentNodeBase<ListNode.IChild>, ParagraphNode.IChild, TitleNode.IChild, ListItemNode.IChild
@@ -67,7 +67,7 @@ namespace Dast
         public bool Ordered { get; set; }
 
         public interface IChild : IDocumentNode { }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitList(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitList(this);
     }
 
     public class ListItemNode : ListNode.IChild
@@ -85,77 +85,77 @@ namespace Dast
         }
 
         public interface IChild : IDocumentNode { }
-        public string Accept(IDocumentVisitor visitor) => visitor.VisitListItem(this);
+        public void Accept(IDocumentVisitor visitor) => visitor.VisitListItem(this);
     }
 
     public class LineNode : ParentNodeBase<LineNode.IChild>, ParagraphNode.IChild, TitleNode.IChild, ListItemNode.IChild
     {
         public interface IChild : IDocumentNode { }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitLine(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitLine(this);
     }
 
     public class InternalLinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
         public AdressNode AdressNode { get; set; }
         public string AdressByDefault { get; set; }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitInternalLink(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitInternalLink(this);
     }
 
     public class ExternalLinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
         public string Adress { get; set; }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitExternalLink(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitExternalLink(this);
     }
 
     public class AdressNode : LeafNodeBase, LineNode.IChild
     {
         public List<string> Names { get; } = new List<string>();
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitAdress(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitAdress(this);
     }
 
     public class ReferenceNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
         public NoteNode Note { get; set; }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitReference(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitReference(this);
     }
 
     public class NoteNode : DocumentNode.IChild
     {
         public LineNode Line { get; set; }
         public IEnumerable<IDocumentNode> Children { get { yield return Line; } }
-        public string Accept(IDocumentVisitor visitor) => visitor.VisitNote(this);
+        public void Accept(IDocumentVisitor visitor) => visitor.VisitNote(this);
     }
 
     public class BoldNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitBold(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitBold(this);
     }
 
     public class ItalicNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitItalic(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitItalic(this);
     }
 
     public class MarkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitMark(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitMark(this);
     }
 
     public class ObsoleteNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitObsolete(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitObsolete(this);
     }
 
     public class EmphasisNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
         public string Class { get; set; }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitEmphasis(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitEmphasis(this);
     }
 
     public class TextNode : LeafNodeBase, LineNode.IChild
     {
         public string Content { get; set; }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitText(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitText(this);
     }
 
     public enum MediaType
@@ -180,18 +180,18 @@ namespace Dast
 
     public class MediaNode : MediaNodeBase, DocumentNode.IChild
     {
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitMedia(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitMedia(this);
     }
 
     public class MediaInlineNode : MediaNodeBase, LineNode.IChild
     {
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitMediaInline(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitMediaInline(this);
     }
 
     public class CommentNode : LeafNodeBase, DocumentNode.IChild, ParagraphNode.IChild, LineNode.IChild
     {
         public bool Inline { get; set; }
         public string Content { get; set; }
-        public override string Accept(IDocumentVisitor visitor) => visitor.VisitComment(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitComment(this);
     }
 }

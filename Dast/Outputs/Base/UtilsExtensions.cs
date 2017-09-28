@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Dast.Outputs.Base
@@ -18,12 +19,17 @@ namespace Dast.Outputs.Base
 
         static public bool HasMultipleLine(this string text)
         {
-            return text.Cast<char>().Contains('\n');
+            return text.Cast<char>().Contains('\n') && !text.EndsWith("\n");
         }
 
         static public bool ContainsAny(this string text, params char[] characters)
         {
             return text.Cast<char>().Any(c => characters.Any(character => character == c));
+        }
+
+        static public bool EqualsOrdinal(this string a, string b)
+        {
+            return a.Equals(b, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

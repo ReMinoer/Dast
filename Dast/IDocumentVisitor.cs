@@ -2,25 +2,25 @@ namespace Dast
 {
     public interface IDocumentVisitor
     {
-        string VisitDocument(DocumentNode node);
-        string VisitParagraph(ParagraphNode node);
-        string VisitTitle(TitleNode node);
-        string VisitList(ListNode node);
-        string VisitListItem(ListItemNode node);
-        string VisitLine(LineNode node);
-        string VisitInternalLink(InternalLinkNode node);
-        string VisitExternalLink(ExternalLinkNode node);
-        string VisitAdress(AdressNode node);
-        string VisitReference(ReferenceNode node);
-        string VisitNote(NoteNode node);
-        string VisitBold(BoldNode node);
-        string VisitItalic(ItalicNode node);
-        string VisitMark(MarkNode node);
-        string VisitObsolete(ObsoleteNode node);
-        string VisitEmphasis(EmphasisNode node);
-        string VisitText(TextNode node);
-        string VisitMedia(MediaNode node);
-        string VisitMediaInline(MediaInlineNode node);
-        string VisitComment(CommentNode node);
+        void VisitDocument(DocumentNode node);
+        void VisitParagraph(ParagraphNode node);
+        void VisitTitle(TitleNode node);
+        void VisitList(ListNode node);
+        void VisitListItem(ListItemNode node);
+        void VisitLine(LineNode node);
+        void VisitInternalLink(InternalLinkNode node);
+        void VisitExternalLink(ExternalLinkNode node);
+        void VisitAdress(AdressNode node);
+        void VisitReference(ReferenceNode node);
+        void VisitNote(NoteNode node);
+        void VisitBold(BoldNode node);
+        void VisitItalic(ItalicNode node);
+        void VisitMark(MarkNode node);
+        void VisitObsolete(ObsoleteNode node);
+        void VisitEmphasis(EmphasisNode node);
+        void VisitText(TextNode node);
+        void VisitMedia(MediaNode node);
+        void VisitMediaInline(MediaInlineNode node);
+        void VisitComment(CommentNode node);
     }
 }

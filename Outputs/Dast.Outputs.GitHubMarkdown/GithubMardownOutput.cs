@@ -1,124 +1,159 @@
 using System;
 using System.Linq;
-using Dast.Extensibility;
+using Dast.Extensibility.Outputs;
 using Dast.Outputs.Base;
 
 namespace Dast.Outputs.GitHubMarkdown
 {
-    public class GitHubMardownOutput : ExtensibleDocumentOutputBase<Media.Contracts.Markdown.IMarkdownMediaOutput>
+    public class GitHubMardownOutput : ExtensibleDocumentWriterBase<Media.Contracts.Markdown.IMarkdownMediaOutput>
     {
         public override string DisplayName => "GitHub Markdown";
         public override FileExtension FileExtension => FileExtensions.Text.Markdown;
 
         private int _listLevel = -1;
 
-        public override string VisitDocument(DocumentNode node)
+        public override void VisitDocument(DocumentNode node)
         {
-            return string.Join(Environment.NewLine, node.Children.Select(Convert));
+            JoinChildren(node, NewLine);
         }
 
-        public override string VisitParagraph(ParagraphNode node)
+        public override void VisitParagraph(ParagraphNode node)
         {
-            return node.Children.Aggregate(Convert);
+            AggregateChildren(node);
         }
 
-        public override string VisitTitle(TitleNode node)
+        public override void VisitTitle(TitleNode node)
         {
-            return node.Children.Aggregate(x => new string('#', node.Level) + " " + Convert(x));
+            Write(new string('#', node.Level) + " ");
+            AggregateChildren(node);
         }
 
-        public override string VisitList(ListNode node)
+        public override void VisitList(ListNode node)
         {
             _listLevel++;
-            string result = node.Children.Select((item, i) => new string(' ', 4 * _listLevel) + (node.Ordered ? (i + 1).ToString() + "." : "*") + " " + Convert(item)).Aggregate();
+            AggregateChildren(i => new string(' ', 4 * _listLevel) + (node.Ordered ? $"{i + 1}." : "*") + " ", node);
             _listLevel--;
-            return result;
         }
 
-        public override string VisitListItem(ListItemNode node)
+        public override void VisitListItem(ListItemNode node)
         {
-            return Convert(node.Line) + Convert(node.Sublist);
+            Write(node.Line);
+            if (node.Sublist != null)
+                Write(node.Sublist);
         }
 
-        public override string VisitLine(LineNode node)
+        public override void VisitLine(LineNode node)
         {
-            return string.Join(" ", node.Children.Select(Convert)) + Environment.NewLine;
+            JoinChildren(node, " ");
+            WriteLine();
         }
 
-        public override string VisitInternalLink(InternalLinkNode node)
+        public override void VisitInternalLink(InternalLinkNode node)
         {
+            string adress = node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "";
+
             if (node.Children.Count == 1 && node.Children[0] is TextNode textNode
-                && (node.AdressNode != null && node.AdressNode.Names.Any(x => x.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
-                    || node.AdressByDefault.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase)))
-                return $"<#{ ToHtmlIdentifier(node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "") }>";
-
-            return "[" + string.Join(" ", node.Children.Select(Convert)) + "](#" + (node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "") + ")";
+                && (node.AdressNode != null && node.AdressNode.Names.Any(x => x.EqualsOrdinal(textNode.Content))
+                || node.AdressByDefault.EqualsOrdinal(textNode.Content)))
+            {
+                Write("<#", ToHtmlIdentifier(adress), ">");
+            }
+            else
+            {
+                Write("[");
+                JoinChildren(node, " ");
+                Write("](#", adress, ")");
+            }
         }
 
-        public override string VisitExternalLink(ExternalLinkNode node)
+        public override void VisitExternalLink(ExternalLinkNode node)
         {
-            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && node.Adress.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
-                return $"<{ node.Adress }>";
-
-            return "[" + string.Join(" ", node.Children.Select(Convert)) + "](" + node.Adress + ")";
+            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && node.Adress.EqualsOrdinal(textNode.Content))
+            {
+                Write("<", node.Adress, ">");
+            }
+            else
+            {
+                Write("[");
+                JoinChildren(node, " ");
+                Write("](", node.Adress, ")");
+            }
         }
 
-        public override string VisitAdress(AdressNode node)
+        public override void VisitAdress(AdressNode node)
         {
-            return $"<span id=\"{ ToHtmlIdentifier(node.Names[0]) }\"></span>";
+            Write($"<span id=\"{ ToHtmlIdentifier(node.Names[0]) }\"></span>");
         }
 
-        protected override string VisitReference(ReferenceNode node, int index)
+        protected override void VisitReference(ReferenceNode node, int index)
         {
-            return $"<span class=\"dast-reference\">{ string.Join(" ", node.Children.Select(Convert)) }<sup><a href=\"#dast-note-{ index }\">{ index }</a></sup></span>";
+            Write("<span class=\"dast-reference\">");
+            JoinChildren(node, " ");
+            Write($"<sup><a href=\"#dast-note-{ index }\">{ index }</a></sup></span>");
         }
 
-        protected override string VisitNote(NoteNode node, int index)
+        protected override void VisitNote(NoteNode node, int index)
         {
-            return $"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. { string.Join(" ", node.Children.Select(Convert)) }</p>{ Environment.NewLine }";
+            Write($"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. ");
+            Write(node.Line);
+            WriteLine("</p>");
         }
 
-        public override string VisitBold(BoldNode node)
+        public override void VisitBold(BoldNode node)
         {
-            return "**" + string.Join(" ", node.Children.Select(Convert)) + "**";
+            Write("**");
+            JoinChildren(node, " ");
+            Write("**");
         }
 
-        public override string VisitItalic(ItalicNode node)
+        public override void VisitItalic(ItalicNode node)
         {
-            return "*" + string.Join(" ", node.Children.Select(Convert)) + "*";
+            Write("*");
+            JoinChildren(node, " ");
+            Write("*");
         }
 
-        public override string VisitMark(MarkNode node)
+        public override void VisitMark(MarkNode node)
         {
-            return "<mark>" + string.Join(" ", node.Children.Select(Convert)) + "</mark>";
+            Write("<mark>");
+            JoinChildren(node, " ");
+            Write("</mark>");
         }
 
-        public override string VisitObsolete(ObsoleteNode node)
+        public override void VisitObsolete(ObsoleteNode node)
         {
-            return "<s>" + string.Join(" ", node.Children.Select(Convert)) + "</s>";
+            Write("<s>");
+            JoinChildren(node, " ");
+            Write("</s>");
         }
 
-        public override string VisitEmphasis(EmphasisNode node)
+        public override void VisitEmphasis(EmphasisNode node)
         {
-            return "<span" + (node.Class != null ? $" class=\"{ ToHtmlIdentifier(node.Class) }\"" : "") + ">" + string.Join(" ", node.Children.Select(Convert)) + "</span>";
+            Write("<span");
+            if (node.Class != null)
+                Write(" class=\"", ToHtmlIdentifier(node.Class), "\"");
+            Write(">");
+
+            JoinChildren(node, " ");
+            Write("</span>");
         }
 
-        public override string VisitText(TextNode textNode)
+        public override void VisitText(TextNode node)
         {
-            return textNode.Content;
+            Write(node.Content);
         }
 
-        public override string VisitMedia(MediaNode node)
+        public override void VisitMedia(MediaNode node)
         {
-            return VisitMediaBase(node, false);
+            VisitMediaBase(node, false);
         }
 
-        public override string VisitMediaInline(MediaInlineNode node)
+        public override void VisitMediaInline(MediaInlineNode node)
         {
-            return VisitMediaBase(node, true);
+            VisitMediaBase(node, true);
         }
 
-        private string VisitMediaBase(MediaNodeBase node, bool inline)
+        private void VisitMediaBase(MediaNodeBase node, bool inline)
         {
             MediaType type;
             Media.Contracts.Markdown.IMarkdownMediaOutput mediaConverter = null;
@@ -133,27 +168,40 @@ namespace Dast.Outputs.GitHubMarkdown
             switch (type)
             {
                 case MediaType.Code:
-                    return inline ? "`" + node.Content + "`" : "```" + node.Extension + Environment.NewLine + node.Content + Environment.NewLine + "```";
-                case MediaType.Visual:
-                    if (mediaConverter == null)
                     {
-                        mediaConverter = MediaOutputs.FirstOrDefault(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
-                        if (mediaConverter == null)
-                            return "";
+                        if (inline)
+                            Write("`", node.Content, "`");
+                        else
+                        {
+                            WriteLine("```", node.Extension);
+                            WriteLine(node.Content);
+                            WriteLine("```");
+                        }
+                        return;
                     }
-                    return Environment.NewLine + mediaConverter.Convert(node.Extension, node.Content, inline) + Environment.NewLine;
+                case MediaType.Visual:
+                    {
+                        if (mediaConverter == null)
+                        {
+                            mediaConverter = MediaOutputs.FirstOrDefault(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
+                            if (mediaConverter == null)
+                                return;
+                        }
+                        
+                        Write(mediaConverter.Convert(node.Extension, node.Content, inline));
+                        WriteLine();
+
+                        return;
+                    }
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        public override string VisitComment(CommentNode node)
+        public override void VisitComment(CommentNode node)
         {
-            return "<!--"
-                   + (node.Inline ? " " : Environment.NewLine)
-                   + node.Content
-                   + (node.Inline ? " " : Environment.NewLine)
-                   + "-->";
+            string ws = node.Inline ? " " : NewLine;
+            Write("<!--", ws, node.Content, ws, "-->");
         }
 
         static public string ToHtmlIdentifier(string name)

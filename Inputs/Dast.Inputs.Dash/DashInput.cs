@@ -45,7 +45,7 @@ namespace Dast.Inputs.Dash
             var parser = new DashParser(tokens);
             DashParser.ParseContext context = parser.TwoStageParsing(x => x.parse());
 
-            return new DashInput().Visit(context);
+            return Visit(context);
         }
 
         public override IDocumentNode VisitParse(DashParser.ParseContext context)
@@ -431,6 +431,13 @@ namespace Dast.Inputs.Dash
 
         public override IDocumentNode VisitExtensionModeContent(DashParser.ExtensionModeContentContext context)
         {
+            DashParser.ExtensionModeLineContext[] lines = context.extensionModeLine();
+            IEnumerable<string> enumerable = lines.Select(x => x.Accept(this)).Cast<ValueNode<string>>().Select(x => x.Value);
+            return new ValueNode<string>(string.Join(Environment.NewLine, enumerable));
+        }
+
+        public override IDocumentNode VisitExtensionModeLine(DashParser.ExtensionModeLineContext context)
+        {
             return new ValueNode<string>(context.GetText());
         }
 
@@ -441,6 +448,11 @@ namespace Dast.Inputs.Dash
         }
 
         public override IDocumentNode VisitDashExtensionModeContent(DashParser.DashExtensionModeContentContext context)
+        {
+            return new ValueNode<string>(string.Join(Environment.NewLine, context.dashExtensionModeLine().Select(x => x.Accept(this)).Cast<ValueNode<string>>().Select(x => x.Value)));
+        }
+
+        public override IDocumentNode VisitDashExtensionModeLine(DashParser.DashExtensionModeLineContext context)
         {
             return new ValueNode<string>(context.GetText());
         }
@@ -561,7 +573,7 @@ namespace Dast.Inputs.Dash
                 Value = value;
             }
 
-            public string Accept(IDocumentVisitor visitor) => throw new InvalidOperationException();
+            public void Accept(IDocumentVisitor visitor) => throw new InvalidOperationException();
         }
 
         public class CollectionNode : IDocumentNode
@@ -569,7 +581,7 @@ namespace Dast.Inputs.Dash
             public List<IDocumentNode> Items { get; } = new List<IDocumentNode>();
             public IEnumerable<IDocumentNode> Children { get { yield break; } }
             
-            public string Accept(IDocumentVisitor visitor) => throw new InvalidOperationException();
+            public void Accept(IDocumentVisitor visitor) => throw new InvalidOperationException();
         }
     }
 }

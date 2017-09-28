@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Dast.Outputs.Base
 {
-    public abstract class DocumentOutputBase<TMedia> : IDocumentVisitor, IDocumentOutput<TMedia, string>
+    public abstract class DocumentOutputBase<TMedia, TOutput> : IDocumentVisitor, IDocumentOutput<TMedia, TOutput>
         where TMedia : IMediaOutput
     {
         private readonly List<NoteNode> _notes = new List<NoteNode>();
@@ -13,15 +13,12 @@ namespace Dast.Outputs.Base
         protected abstract IEnumerable<TMedia> MediaOutputs { get; }
         
         IEnumerable<FileExtension> IFormat.FileExtensions { get { yield return FileExtension; } }
-        IEnumerable<TMedia> IDocumentOutput<TMedia, string>.MediaOutputs => MediaOutputs;
+        IEnumerable<TMedia> IDocumentOutput<TMedia, TOutput>.MediaOutputs => MediaOutputs;
         IEnumerable<IMediaOutput> IDocumentOutput.MediaOutputs => MediaOutputs.Cast<IMediaOutput>();
 
-        public string Convert(IDocumentNode node)
-        {
-            return node?.Accept(this) ?? "";
-        }
+        public abstract TOutput Convert(IDocumentNode node);
 
-        public string VisitReference(ReferenceNode node)
+        public void VisitReference(ReferenceNode node)
         {
             int index = _notes.IndexOf(node.Note);
             if (index == -1)
@@ -32,33 +29,33 @@ namespace Dast.Outputs.Base
             else
                 index++;
 
-            return VisitReference(node, index);
+            VisitReference(node, index);
         }
 
-        public string VisitNote(NoteNode node)
+        public void VisitNote(NoteNode node)
         {
-            return VisitNote(node, _notes.IndexOf(node) + 1);
+            VisitNote(node, _notes.IndexOf(node) + 1);
         }
 
-        public abstract string VisitDocument(DocumentNode node);
-        public abstract string VisitParagraph(ParagraphNode node);
-        public abstract string VisitTitle(TitleNode node);
-        public abstract string VisitList(ListNode node);
-        public abstract string VisitListItem(ListItemNode node);
-        public abstract string VisitLine(LineNode node);
-        public abstract string VisitInternalLink(InternalLinkNode node);
-        public abstract string VisitExternalLink(ExternalLinkNode node);
-        public abstract string VisitAdress(AdressNode node);
-        protected abstract string VisitReference(ReferenceNode node, int index);
-        protected abstract string VisitNote(NoteNode node, int index);
-        public abstract string VisitBold(BoldNode node);
-        public abstract string VisitItalic(ItalicNode node);
-        public abstract string VisitMark(MarkNode node);
-        public abstract string VisitObsolete(ObsoleteNode node);
-        public abstract string VisitEmphasis(EmphasisNode node);
-        public abstract string VisitText(TextNode node);
-        public abstract string VisitMedia(MediaNode node);
-        public abstract string VisitMediaInline(MediaInlineNode node);
-        public abstract string VisitComment(CommentNode node);
+        public abstract void VisitDocument(DocumentNode node);
+        public abstract void VisitParagraph(ParagraphNode node);
+        public abstract void VisitTitle(TitleNode node);
+        public abstract void VisitList(ListNode node);
+        public abstract void VisitListItem(ListItemNode node);
+        public abstract void VisitLine(LineNode node);
+        public abstract void VisitInternalLink(InternalLinkNode node);
+        public abstract void VisitExternalLink(ExternalLinkNode node);
+        public abstract void VisitAdress(AdressNode node);
+        protected abstract void VisitReference(ReferenceNode node, int index);
+        protected abstract void VisitNote(NoteNode node, int index);
+        public abstract void VisitBold(BoldNode node);
+        public abstract void VisitItalic(ItalicNode node);
+        public abstract void VisitMark(MarkNode node);
+        public abstract void VisitObsolete(ObsoleteNode node);
+        public abstract void VisitEmphasis(EmphasisNode node);
+        public abstract void VisitText(TextNode node);
+        public abstract void VisitMedia(MediaNode node);
+        public abstract void VisitMediaInline(MediaInlineNode node);
+        public abstract void VisitComment(CommentNode node);
     }
 }
