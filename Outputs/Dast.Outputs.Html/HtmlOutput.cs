@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using Dast.Extensibility.Outputs;
 using Dast.Media.Contracts.Html;
 
@@ -7,32 +6,58 @@ namespace Dast.Outputs.Html
 {
     public class HtmlOutput : ExtensibleDocumentMultiWriterMergerBase<FragmentedHtmlOutput, IHtmlMediaOutput, HtmlFragment>
     {
-        protected override IEnumerable<HtmlFragment> MergeFragments(TextWriter writer)
+        protected override IEnumerable<HtmlFragment> MergeFragments()
         {
-            writer.WriteLine("<html>");
-            writer.WriteLine("<head>");
+            using (Conditional)
+            {
+                Writer.WriteLine("<html>");
 
-            writer.Write("<title>");
-            yield return HtmlFragment.Title;
-            writer.WriteLine("</title>");
+                using (Conditional)
+                {
+                    Writer.WriteLine("<head>");
 
-            writer.WriteLine("<style media=\"screen\" type=\"text/css\">");
-            yield return HtmlFragment.Css;
-            writer.WriteLine();
-            writer.WriteLine("</style>");
+                    using (Conditional)
+                    {
+                        Writer.Write("<title>");
+                        yield return HtmlFragment.Title;
+                        Writer.WriteLine("</title>");
+                    }
 
-            yield return HtmlFragment.Head;
+                    using (Conditional)
+                    {
+                        Writer.WriteLine("<style media=\"screen\" type=\"text/css\">");
+                        yield return HtmlFragment.Css;
+                        Writer.WriteLine();
+                        Writer.WriteLine("</style>");
+                    }
 
-            writer.WriteLine("</head>");
-            writer.WriteLine("<body>");
+                    using (Conditional)
+                        yield return HtmlFragment.Head;
 
-            yield return HtmlFragment.Body;
-            writer.WriteLine();
-            yield return HtmlFragment.EndOfPage;
-            writer.WriteLine();
+                    Writer.WriteLine("</head>");
+                }
+                
+                using (Conditional)
+                {
+                    Writer.WriteLine("<body>");
 
-            writer.WriteLine("</body>");
-            writer.WriteLine("</html>");
+                    using (Conditional)
+                    {
+                        yield return HtmlFragment.Body;
+                        Writer.WriteLine();
+                    }
+
+                    using (Conditional)
+                    {
+                        yield return HtmlFragment.EndOfPage;
+                        Writer.WriteLine();
+                    }
+
+                    Writer.WriteLine("</body>");
+                }
+
+                Writer.WriteLine("</html>");
+            }
         }
     }
 }

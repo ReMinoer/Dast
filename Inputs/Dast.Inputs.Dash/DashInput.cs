@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Composition;
+using System.IO;
 using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -12,7 +13,7 @@ using Dast.Outputs.Base;
 
 namespace Dast.Inputs.Dash
 {
-    public class DashInput : DashParserBaseVisitor<IDocumentNode>, IDocumentInput<IDashMediaInput, string>, IExtensible<IDashMediaInput>
+    public class DashInput : DashParserBaseVisitor<IDocumentNode>, IDocumentReader<IDashMediaInput>, IExtensible<IDashMediaInput>
     {
         public string DisplayName => "Dash";
         public FileExtension FileExtension => Dast.FileExtensions.Text.Dash;
@@ -35,10 +36,11 @@ namespace Dast.Inputs.Dash
         public ICollection<IDashMediaInput> Extensions => MediaCatalog;
         IEnumerable IExtensible.Extend(CompositionContext context) => Extend(context);
 
-        public IDocumentNode Convert(string input)
-        {
-            var inputStream = new AntlrInputStream(input);
+        public IDocumentNode Convert(string input) => Convert(new AntlrInputStream(input));
+        public IDocumentNode Convert(Stream stream) => Convert(new AntlrInputStream(stream));
 
+        private IDocumentNode Convert(ICharStream inputStream)
+        {
             var lexer = new DashLexer(inputStream);
             var tokens = new CommonTokenStream(lexer);
 

@@ -32,7 +32,7 @@ namespace Dast.Console
             if (args.Length == 0)
             {
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
-                args = new[] { "../../../../../External/DashCSharp/External/Dash/doc.dh", "md", "html", "dh" };
+                args = new[] { "../../../../../External/DashCSharp/External/Dash/doc.dh", "md", "dh", "html" };
             }
 #endif
 
@@ -44,7 +44,7 @@ namespace Dast.Console
             }
 
             string filePath = args[0];
-            IEnumerable<string> outputExtensions = args.Skip(1);
+            string[] outputExtensions = args.Skip(1).ToArray();
 
             if (Process(filePath, outputExtensions))
                 return;
@@ -54,7 +54,7 @@ namespace Dast.Console
             System.Console.ReadKey();
         }
 
-        static private bool Process(string filePath, IEnumerable<string> outputExtensions)
+        static private bool Process(string filePath, string[] outputExtensions)
         {
             string workingDirectory = Directory.GetCurrentDirectory();
 
@@ -67,17 +67,21 @@ namespace Dast.Console
             }
 
             string inputExtension = file.Extension.TrimStart('.');
-            string content = File.ReadAllText(file.FullName);
 
-            var converter = new ExtensibleDastConverter<string, string>();
+            var converter = new DastTextConverter();
             ExtensionsLoader.FromAssemblies(GetAssemblies(), converter);
             
             Stopwatch stopWatch = Stopwatch.StartNew();
 
-            foreach ((FileExtension extension, string result) output in converter.Convert(inputExtension, content, outputExtensions))
+            using (FileStream inputStream = file.OpenRead())
             {
-                string outputFile = Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, output.extension.Main));
-                File.WriteAllText(outputFile, output.result);
+                Dictionary<string, Stream> outputStreams = outputExtensions
+                    .ToDictionary<string, string, Stream>(x => x, x => File.Create(Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, x))));
+
+                converter.Convert(inputExtension, inputStream, outputStreams);
+
+                foreach (Stream outputStream in outputStreams.Values)
+                    outputStream.Dispose();
             }
 
             stopWatch.Stop();

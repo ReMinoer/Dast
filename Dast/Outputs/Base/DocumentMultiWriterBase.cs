@@ -61,7 +61,7 @@ namespace Dast.Outputs.Base
         public IDictionary<TStreamKey, string> Convert(IDocumentNode node, IEnumerable<TStreamKey> streamKeys)
         {
             _streamKeys = (streamKeys ?? DefaultKeys).ToList();
-            _stringWriters = (streamKeys ?? DefaultKeys).ToDictionary(x => x, x => new StringWriter());
+            _stringWriters = _streamKeys.ToDictionary(x => x, x => new StringWriter());
 
             node.Accept(this);
             Dictionary<TStreamKey, string> result = _stringWriters.ToDictionary(x => x.Key, x => x.Value.ToString());

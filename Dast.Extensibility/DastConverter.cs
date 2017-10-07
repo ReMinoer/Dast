@@ -7,7 +7,7 @@ using Dast.Outputs;
 
 namespace Dast.Extensibility
 {
-    public class ExtensibleDastConverter<TInput, TOutput> : IExtensible<IDocumentInput<TInput>>, IExtensible<IDocumentOutput<TOutput>>
+    public class DastConverter<TInput, TOutput> : IExtensible<IDocumentInput<TInput>>, IExtensible<IDocumentOutput<TOutput>>
     {
         public ExtensibleFormatCatalog<IDocumentInput<TInput>> InputCatalog { get; } = new ExtensibleFormatCatalog<IDocumentInput<TInput>>();
         public ExtensibleFormatCatalog<IDocumentOutput<TOutput>> OutputCatalog { get; } = new ExtensibleFormatCatalog<IDocumentOutput<TOutput>>();
@@ -20,7 +20,7 @@ namespace Dast.Extensibility
             if (input == null)
                 return default(TOutput);
 
-            IDocumentOutput<TOutput> output = OutputCatalog.FirstOrDefault(x => x.FileExtension == inputExtension);
+            IDocumentOutput<TOutput> output = OutputCatalog.FirstOrDefault(x => x.FileExtension == outputExtension);
             return output != null ? output.Convert(input.Convert(content)) : default(TOutput);
         }
 
@@ -31,7 +31,7 @@ namespace Dast.Extensibility
                 return Enumerable.Empty<TOutput>();
 
             IDocumentNode document = input.Convert(content);
-            return outputExtensions.Select(e => OutputCatalog.FirstOrDefault(x => x.FileExtension == inputExtension))
+            return outputExtensions.Select(e => OutputCatalog.FirstOrDefault(x => x.FileExtension == e))
                                    .Select(o => o != null ? o.Convert(document) : default(TOutput));
         }
 
@@ -61,7 +61,7 @@ namespace Dast.Extensibility
         public IEnumerable<(FileExtension extension, TOutput result)> Convert(string inputExtension, TInput content, params string[] outputExtensions)
             => Convert(inputExtension, content, outputExtensions.AsEnumerable());
 
-        public IEnumerable Extend(CompositionContext context)
+        public virtual IEnumerable Extend(CompositionContext context)
         {
             foreach (IDocumentInput<TInput> documentInputExtension in InputCatalog.Extend(context))
                 yield return documentInputExtension;
@@ -72,7 +72,7 @@ namespace Dast.Extensibility
         IEnumerable<IDocumentInput<TInput>> IExtensible<IDocumentInput<TInput>>.Extend(CompositionContext context) => InputCatalog.Extend(context);
         IEnumerable<IDocumentOutput<TOutput>> IExtensible<IDocumentOutput<TOutput>>.Extend(CompositionContext context) => OutputCatalog.Extend(context);
 
-        public void ResetToVanilla()
+        public virtual void ResetToVanilla()
         {
             InputCatalog.Clear();
             OutputCatalog.Clear();
