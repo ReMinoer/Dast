@@ -5,22 +5,22 @@ using System.Linq;
 
 namespace Dast.Outputs.Base
 {
-    public abstract class DocumentMultiWriterBase<TMedia, TStreamKey> : DocumentWriterSharedBase<TMedia, IDictionary<TStreamKey, string>>, IDocumentMultiWriter<TMedia, TStreamKey>
+    public abstract class FragmentedDocumentWriterBase<TMedia, TFragment> : DocumentWriterSharedBase<TMedia, IDictionary<TFragment, string>>, IFragmentedDocumentWriter<TMedia, TFragment>
         where TMedia : IMediaOutput
-        where TStreamKey : struct
+        where TFragment : struct
     {
         private TextWriter _mainWriter;
         protected override TextWriter MainWriter => _mainWriter;
 
         private Stream _currentStream;
-        private TStreamKey _currentStreamKey;
-        private List<TStreamKey> _streamKeys;
-        private Dictionary<TStreamKey, StringWriter> _stringWriters;
-        private Dictionary<TStreamKey, Func<Stream>> _streamProviders;
-        protected abstract IEnumerable<TStreamKey> DefaultKeys { get; }
-        IEnumerable<TMedia> IDocumentOutput<TMedia, IDictionary<TStreamKey, string>>.MediaOutputs => MediaOutputs;
+        private TFragment? _currentStreamKey;
+        private List<TFragment> _streamKeys;
+        private Dictionary<TFragment, StringWriter> _stringWriters;
+        private Dictionary<TFragment, Func<Stream>> _streamProviders;
+        protected abstract IEnumerable<TFragment> DefaultKeys { get; }
+        IEnumerable<TMedia> IDocumentOutput<TMedia, IDictionary<TFragment, string>>.MediaOutputs => MediaOutputs;
 
-        protected TStreamKey CurrentStream
+        protected TFragment? CurrentStream
         {
             get => _currentStreamKey;
             set
@@ -36,7 +36,7 @@ namespace Dast.Outputs.Base
                     _currentStream.Dispose();
                 }
 
-                if (!_streamKeys.Contains(value))
+                if (_currentStreamKey == null || !_streamKeys.Contains(_currentStreamKey.Value))
                 {
                     _currentStream = null;
                     _mainWriter = TextWriter.Null;
@@ -45,27 +45,29 @@ namespace Dast.Outputs.Base
 
                 if (_streamProviders != null)
                 {
-                    _currentStream = _streamProviders[value]();
+                    _currentStream = _streamProviders[_currentStreamKey.Value]();
                     _mainWriter = new StreamWriter(_currentStream);
                 }
                 else if (_stringWriters != null)
                 {
                     _currentStream = null;
-                    _mainWriter = _stringWriters[value];
+                    _mainWriter = _stringWriters[_currentStreamKey.Value];
                 }
                 else
                     throw new InvalidOperationException();
             }
         }
 
-        public IDictionary<TStreamKey, string> Convert(IDocumentNode node, IEnumerable<TStreamKey> streamKeys)
+        public IDictionary<TFragment, string> Convert(IDocumentNode node, IEnumerable<TFragment> streamKeys)
         {
             _streamKeys = (streamKeys ?? DefaultKeys).ToList();
             _stringWriters = _streamKeys.ToDictionary(x => x, x => new StringWriter());
 
             node.Accept(this);
-            Dictionary<TStreamKey, string> result = _stringWriters.ToDictionary(x => x.Key, x => x.Value.ToString());
+            Dictionary<TFragment, string> result = _stringWriters.ToDictionary(x => x.Key, x => x.Value.ToString());
 
+            _currentStream = null;
+            _currentStreamKey = null;
             _streamKeys = null;
             _stringWriters = null;
             _mainWriter = null;
@@ -73,20 +75,22 @@ namespace Dast.Outputs.Base
             return result;
         }
         
-        public void Convert(IDocumentNode node, IDictionary<TStreamKey, Func<Stream>> streamProviders)
+        public void Convert(IDocumentNode node, IDictionary<TFragment, Func<Stream>> streamProviders)
         {
             _streamKeys = streamProviders.Keys.ToList();
             _streamProviders = streamProviders.ToDictionary(x => x.Key, x => x.Value);
 
             node.Accept(this);
 
+            _currentStream = null;
+            _currentStreamKey = null;
             _streamKeys = null;
             _streamProviders = null;
             _mainWriter = null;
         }
 
-        public override IDictionary<TStreamKey, string> Convert(IDocumentNode node) => Convert(node, DefaultKeys);
-        public IDictionary<TStreamKey, string> Convert(IDocumentNode node, params TStreamKey[] streamKeys) => Convert(node, streamKeys.AsEnumerable());
-        IDictionary<TStreamKey, string> IDocumentOutput<IDictionary<TStreamKey, string>>.Convert(IDocumentNode node) => Convert(node, DefaultKeys);
+        public override IDictionary<TFragment, string> Convert(IDocumentNode node) => Convert(node, DefaultKeys);
+        public IDictionary<TFragment, string> Convert(IDocumentNode node, params TFragment[] streamKeys) => Convert(node, streamKeys.AsEnumerable());
+        IDictionary<TFragment, string> IDocumentOutput<IDictionary<TFragment, string>>.Convert(IDocumentNode node) => Convert(node, DefaultKeys);
     }
 }

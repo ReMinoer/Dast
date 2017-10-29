@@ -6,9 +6,9 @@ using Dast.Outputs.Base;
 
 namespace Dast.Extensibility.Outputs
 {
-    public abstract class ExtensibleDocumentMultiWriterBase<TMedia, TStreamKey> : DocumentMultiWriterBase<TMedia, TStreamKey>, IExtensible<TMedia>
+    public abstract class ExtensibleFragmentedDocumentWriterBase<TMedia, TFragment> : FragmentedDocumentWriterBase<TMedia, TFragment>, IExtensible<TMedia>
         where TMedia : IMediaOutput
-        where TStreamKey : struct
+        where TFragment : struct
     {
         public ExtensibleFormatCatalog<TMedia> MediaCatalog { get; } = new ExtensibleFormatCatalog<TMedia>();
         protected override IEnumerable<TMedia> MediaOutputs => MediaCatalog;

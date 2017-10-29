@@ -4,7 +4,7 @@ using Dast.Media.Contracts.Html;
 
 namespace Dast.Outputs.Html
 {
-    public class HtmlOutput : ExtensibleDocumentMultiWriterMergerBase<FragmentedHtmlOutput, IHtmlMediaOutput, HtmlFragment>
+    public class HtmlOutput : ExtensibleFragmentedDocumentMergerBase<FragmentedHtmlOutput, IHtmlMediaOutput, HtmlFragment>
     {
         protected override IEnumerable<HtmlFragment> MergeFragments()
         {
@@ -44,6 +44,12 @@ namespace Dast.Outputs.Html
                     using (Conditional)
                     {
                         yield return HtmlFragment.Body;
+                        Writer.WriteLine();
+                    }
+
+                    using (Conditional)
+                    {
+                        yield return HtmlFragment.Notes;
                         Writer.WriteLine();
                     }
 

@@ -1,20 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dast.Extensibility.Outputs;
+using Dast.Media.Contracts.Dash;
 using Dast.Outputs.Base;
 
 namespace Dast.Outputs.Dash
 {
-    public class DashOutput : ExtensibleDocumentWriterBase<Media.Contracts.Dash.IDashMediaOutput>
+    public class FragmentedDashOutput : ExtensibleFragmentedDocumentWriterBase<IDashMediaOutput, DashFragment>
     {
         public override string DisplayName => "Dash";
         public override FileExtension FileExtension => FileExtensions.Text.Dash;
+
+        protected override IEnumerable<DashFragment> DefaultKeys
+        {
+            get
+            {
+                yield return DashFragment.Body;
+                yield return DashFragment.Notes;
+            }
+        }
 
         private int _listLevel = -1;
         public int RecommendedLineSize { get; set; } = 100;
 
         public override void VisitDocument(DocumentNode node)
         {
+            CurrentStream = DashFragment.Body;
             Aggregate("<> ", node.MainTitles);
             WriteLine();
 
@@ -122,8 +134,10 @@ namespace Dast.Outputs.Dash
 
         protected override void VisitNote(NoteNode node, int index)
         {
+            CurrentStream = DashFragment.Notes;
             Write("[", index.ToString(), "] ");
             Write(node.Line);
+            CurrentStream = DashFragment.Body;
         }
 
         public override void VisitBold(BoldNode node)

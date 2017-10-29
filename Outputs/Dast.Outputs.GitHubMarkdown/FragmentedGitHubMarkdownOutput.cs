@@ -1,19 +1,31 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dast.Extensibility.Outputs;
+using Dast.Media.Contracts.Markdown;
 using Dast.Outputs.Base;
 
 namespace Dast.Outputs.GitHubMarkdown
 {
-    public class GitHubMardownOutput : ExtensibleDocumentWriterBase<Media.Contracts.Markdown.IMarkdownMediaOutput>
+    public class FragmentedGitHubMarkdownOutput : ExtensibleFragmentedDocumentWriterBase<IMarkdownMediaOutput, GithubMarkdownFragment>
     {
         public override string DisplayName => "GitHub Markdown";
         public override FileExtension FileExtension => FileExtensions.Text.Markdown;
+
+        protected override IEnumerable<GithubMarkdownFragment> DefaultKeys
+        {
+            get
+            {
+                yield return GithubMarkdownFragment.Body;
+                yield return GithubMarkdownFragment.Notes;
+            }
+        }
 
         private int _listLevel = -1;
 
         public override void VisitDocument(DocumentNode node)
         {
+            CurrentStream = GithubMarkdownFragment.Body;
             JoinChildren(node, NewLine);
         }
 
@@ -94,9 +106,11 @@ namespace Dast.Outputs.GitHubMarkdown
 
         protected override void VisitNote(NoteNode node, int index)
         {
+            CurrentStream = GithubMarkdownFragment.Notes;
             Write($"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. ");
             Write(node.Line);
             WriteLine("</p>");
+            CurrentStream = GithubMarkdownFragment.Body;
         }
 
         public override void VisitBold(BoldNode node)
@@ -156,7 +170,7 @@ namespace Dast.Outputs.GitHubMarkdown
         private void VisitMediaBase(MediaNodeBase node, bool inline)
         {
             MediaType type;
-            Media.Contracts.Markdown.IMarkdownMediaOutput mediaConverter = null;
+            IMarkdownMediaOutput mediaConverter = null;
             if (node.Type.HasValue)
                 type = node.Type.Value;
             else

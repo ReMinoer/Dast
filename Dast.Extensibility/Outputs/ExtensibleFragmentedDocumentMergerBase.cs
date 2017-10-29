@@ -6,8 +6,8 @@ using Dast.Outputs.Base;
 
 namespace Dast.Extensibility.Outputs
 {
-    public abstract class ExtensibleDocumentMultiWriterMergerBase<TMultiWriter, TMedia, TFragment> : DocumentMultiWriterMergerBase<TMultiWriter, TMedia, TFragment>, IExtensible<TMedia>
-        where TMultiWriter : IDocumentMultiWriter<TMedia, TFragment>, IExtensible<TMedia>, new()
+    public abstract class ExtensibleFragmentedDocumentMergerBase<TMultiWriter, TMedia, TFragment> : FragmentedDocumentMergerBase<TMultiWriter, TMedia, TFragment>, IExtensible<TMedia>
+        where TMultiWriter : IFragmentedDocumentWriter<TMedia, TFragment>, IExtensible<TMedia>, new()
         where TMedia : IMediaOutput
         where TFragment : struct
     {

@@ -5,11 +5,19 @@ using Dast.Media.Contracts.Html;
 
 namespace Dast.Outputs.Html
 {
-    public class FragmentedHtmlOutput : ExtensibleDocumentMultiWriterBase<IHtmlMediaOutput, HtmlFragment>
+    public class FragmentedHtmlOutput : ExtensibleFragmentedDocumentWriterBase<IHtmlMediaOutput, HtmlFragment>
     {
         public override string DisplayName => "HTML";
         public override FileExtension FileExtension => FileExtensions.Programming.Html;
-        protected override IEnumerable<HtmlFragment> DefaultKeys { get { yield return HtmlFragment.Body; } }
+
+        protected override IEnumerable<HtmlFragment> DefaultKeys
+        {
+            get
+            {
+                yield return HtmlFragment.Body;
+                yield return HtmlFragment.Notes;
+            }
+        }
 
         private readonly HashSet<IHtmlMediaOutput> _usedMediaConverters = new HashSet<IHtmlMediaOutput>();
 
@@ -93,9 +101,11 @@ namespace Dast.Outputs.Html
 
         protected override void VisitNote(NoteNode node, int index)
         {
+            CurrentStream = HtmlFragment.Notes;
             Write("<p class=\"dast-note\" id=\"dast-note-", index.ToString(), "\">", index.ToString(), ". ");
             JoinChildren(node, " ");
             Write("</p>");
+            CurrentStream = HtmlFragment.Body;
         }
 
         public override void VisitBold(BoldNode node)
