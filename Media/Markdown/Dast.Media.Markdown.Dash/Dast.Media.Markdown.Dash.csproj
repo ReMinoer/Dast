@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Dast\Dast.csproj" />
+    <ProjectReference Include="..\..\..\External\DashCSharp\DashCSharp\DashCSharp\DashCSharp.csproj" />
+    <ProjectReference Include="..\..\..\Inputs\Dast.Inputs.Dash\Dast.Inputs.Dash.csproj" />
+    <ProjectReference Include="..\..\..\Outputs\Dast.Outputs.GitHubMarkdown\Dast.Outputs.GitHubMarkdown.csproj" />
+    <ProjectReference Include="..\..\Dast.Media.Contracts\Dast.Media.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
