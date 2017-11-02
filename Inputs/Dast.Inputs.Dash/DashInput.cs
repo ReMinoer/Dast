@@ -93,6 +93,72 @@ namespace Dast.Inputs.Dash
             return null;
         }
 
+        public override IDocumentNode VisitParagraphInline(DashParser.ParagraphInlineContext context)
+        {
+            IEnumerable<IDocumentNode> content;
+            IEnumerable<ParserRuleContext> rules = context.GetRules();
+
+            DashParser.TitleHeaderContext titleHeader = context.titleHeader();
+            if (titleHeader != null)
+            {
+                int titleLevel = ((ValueNode<int>)titleHeader.Accept(this)).Value;
+                content = rules.Skip(1).Select(x => x.Accept(this)).NotNulls();
+                var titleNode = new TitleNode
+                {
+                    Level = titleLevel
+                };
+                titleNode.Children.AddRange(content.Cast<TitleNode.IChild>());
+                return titleNode;
+            }
+
+            DashParser.HeaderContext header = context.header();
+            if (header != null)
+            {
+                rules = rules.Skip(1);
+                _paragraphMode = null;
+                _titleMode = null;
+            }
+
+            content = rules.Select(x => x.Accept(this)).NotNulls();
+
+            IDocumentNode node;
+            if (header != null)
+            {
+                var paragraphNode = new ParagraphNode
+                {
+                    Class = (header.Accept(this) as ValueNode<string>)?.Value
+                };
+                paragraphNode.Children.AddRange(content.Cast<ParagraphNode.IChild>());
+                node = paragraphNode;
+            }
+            else if (_paragraphMode != null)
+            {
+                var paragraphNode = new ParagraphNode
+                {
+                    Class = _paragraphMode
+                };
+                paragraphNode.Children.AddRange(content.Cast<ParagraphNode.IChild>());
+                node = paragraphNode;
+            }
+            else if (_titleMode != null)
+            {
+                var titleNode = new TitleNode
+                {
+                    Level = _titleMode.Value
+                };
+                titleNode.Children.AddRange(content.Cast<TitleNode.IChild>());
+                node = titleNode;
+            }
+            else
+            {
+                var paragraphNode = new ParagraphNode();
+                paragraphNode.Children.AddRange(content.Cast<ParagraphNode.IChild>());
+                node = paragraphNode;
+            }
+
+            return node;
+        }
+
         public override IDocumentNode VisitParagraph(DashParser.ParagraphContext context)
         {
             IEnumerable<IDocumentNode> content;
