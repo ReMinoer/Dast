@@ -167,7 +167,7 @@ namespace Dast.Outputs.Html
 
             IHtmlMediaOutput mediaConverter;
             if (node.Type.HasValue)
-                mediaConverter = MediaOutputs.FirstOrDefault(x => x.Type == node.Type.Value);
+                mediaConverter = compatibtleConverters.FirstOrDefault(x => x.Type == node.Type.Value);
             else
                 mediaConverter = compatibtleConverters.FirstOrDefault();
 
