@@ -545,23 +545,31 @@ namespace Dast.Inputs.Dash
         static private IDocumentNode HandleMedia<TMediaNode>(ParserRuleContext context, string extension, string content)
             where TMediaNode : MediaNodeBase, new()
         {
+            if (context == null)
+                return new TMediaNode { Extension = extension, Content = content };
+            
             MediaType? type = null;
             TMediaNode mediaNode = null;
             CollectionNode collectionNode = null;
+
             foreach (ITerminalNode terminalNode in context.children.OfType<ITerminalNode>())
             {
                 switch (terminalNode.Symbol.Type)
                 {
+                    case DashParser.EXTENSION_PLUS:
                     case DashParser.EXTENSION_MODE_PLUS:
+                    case DashParser.DASH_EXTENSION_PLUS:
                         type = MediaType.Visual;
                         break;
+                    case DashParser.EXTENSION_MINUS:
                     case DashParser.EXTENSION_MODE_MINUS:
+                    case DashParser.DASH_EXTENSION_MINUS:
                         type = MediaType.Code;
                         break;
                 }
 
                 if (type == null)
-                    break;
+                    continue;
 
                 if (mediaNode != null && collectionNode == null)
                 {
