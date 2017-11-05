@@ -14,8 +14,9 @@ namespace Dast.Extensibility
         static public void FromAssemblies(IEnumerable<Assembly> assemblies, params IExtensible[] extensibles)
         {
             var conventionBuilder = new ConventionBuilder();
+
             foreach (Type extensionType in extensibles.SelectMany(e => e.GetType().GetInterfacesFromDefinition(typeof(IExtensible<>)).Select(t => t.GenericTypeArguments[0])).Distinct())
-                conventionBuilder.ForTypesDerivedFrom(extensionType).Export(x => x.AsContractType(extensionType));
+                conventionBuilder.ForTypesMatching(x => TypeFilter(x, extensionType)).Export(x => x.AsContractType(extensionType));
 
             var nextExtensibles = new List<IExtensible>();
             IEnumerable<Assembly> enumerable = assemblies as IList<Assembly> ?? assemblies.ToList();
@@ -27,6 +28,12 @@ namespace Dast.Extensibility
 
             if (nextExtensibles.Count > 0)
                 FromAssemblies(enumerable, nextExtensibles);
+        }
+
+        static private bool TypeFilter(Type type, Type baseType)
+        {
+            TypeInfo typeInfo = type.GetTypeInfo();
+            return typeInfo.IsPublic && baseType.GetTypeInfo().IsAssignableFrom(typeInfo);
         }
     }
 }
