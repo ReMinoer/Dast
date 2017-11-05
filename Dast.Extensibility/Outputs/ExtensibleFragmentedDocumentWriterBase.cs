@@ -13,8 +13,8 @@ namespace Dast.Extensibility.Outputs
         public ExtensibleFormatCatalog<TMedia> MediaCatalog { get; } = new ExtensibleFormatCatalog<TMedia>();
         protected override IEnumerable<TMedia> MediaOutputs => MediaCatalog;
 
-        public IEnumerable<TMedia> Extend(CompositionContext context) => MediaCatalog.Extend(context);
-        public void ResetToVanilla() => MediaCatalog.ResetToVanilla();
+        public virtual IEnumerable<TMedia> Extend(CompositionContext context) => MediaCatalog.Extend(context);
+        public virtual void ResetToVanilla() => MediaCatalog.ResetToVanilla();
         IEnumerable IExtensible.Extend(CompositionContext context) => Extend(context);
         ICollection<TMedia> IExtensible<TMedia>.Extensions => MediaCatalog;
     }

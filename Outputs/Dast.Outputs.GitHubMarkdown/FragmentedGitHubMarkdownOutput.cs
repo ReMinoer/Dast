@@ -1,14 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Composition;
 using System.Linq;
+using Dast.Extensibility;
 using Dast.Extensibility.Outputs;
+using Dast.Media.Contracts.Html;
 using Dast.Media.Contracts.Markdown;
 using Dast.Outputs.Base;
 
 namespace Dast.Outputs.GitHubMarkdown
 {
-    public class FragmentedGitHubMarkdownOutput : ExtensibleFragmentedDocumentWriterBase<IMarkdownMediaOutput, GithubMarkdownFragment>
+    public class FragmentedGitHubMarkdownOutput : ExtensibleFragmentedDocumentWriterBase<IMarkdownMediaOutput, GithubMarkdownFragment>, IExtensionAdapter<IMarkdownMediaOutput, IHtmlMediaOutput>
     {
+        private int _listLevel = -1;
+
         public override string DisplayName => "GitHub Markdown";
         public override FileExtension FileExtension => FileExtensions.Text.Markdown;
 
@@ -21,7 +26,36 @@ namespace Dast.Outputs.GitHubMarkdown
             }
         }
 
-        private int _listLevel = -1;
+        private readonly ExtensibleFormatCatalog<IHtmlMediaOutput> _htmlMediaOutputs = new ExtensibleFormatCatalog<IHtmlMediaOutput>();
+        
+        ICollection<IHtmlMediaOutput> IExtensible<IHtmlMediaOutput>.Extensions => _htmlMediaOutputs;
+        public IMarkdownMediaOutput Adapt(IHtmlMediaOutput adaptee) => new HtmlMediaOutputAdapter(adaptee);
+
+        public override IEnumerable<IMarkdownMediaOutput> Extend(CompositionContext context)
+        {
+            foreach (IMarkdownMediaOutput markdownMediaOutput in base.Extend(context))
+                yield return markdownMediaOutput;
+
+            foreach (IHtmlMediaOutput htmlMediaOutput in _htmlMediaOutputs.Extend(context))
+            {
+                IMarkdownMediaOutput adapted = Adapt(htmlMediaOutput);
+                MediaCatalog.Add(adapted);
+                yield return adapted;
+            }
+        }
+
+        IEnumerable<IHtmlMediaOutput> IExtensible<IHtmlMediaOutput>.Extend(CompositionContext context)
+        {
+            IHtmlMediaOutput[] htmlMediaOutputs = _htmlMediaOutputs.Extend(context).ToArray();
+            MediaCatalog.AddRange(htmlMediaOutputs.Select(Adapt));
+            return htmlMediaOutputs;
+        }
+
+        public override void ResetToVanilla()
+        {
+            _htmlMediaOutputs.ResetToVanilla();
+            base.ResetToVanilla();
+        }
 
         public override void VisitDocument(DocumentNode node)
         {
