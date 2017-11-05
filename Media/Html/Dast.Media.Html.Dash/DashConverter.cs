@@ -1,37 +1,51 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Composition;
+using System.Linq;
+using Dast.Extensibility;
 using Dast.Inputs.Dash;
 using Dast.Media.Contracts.Html;
 using Dast.Outputs.Html;
 
 namespace Dast.Media.Html.Dash
 {
-    public class DashConverter : HtmlMediaOutputBase
+    public class DashConverter : HtmlMediaOutputBase, IExtensible<IHtmlMediaOutput>
     {
-        private readonly DashInput _dashInput;
-        private readonly FragmentedHtmlOutput _fragmentedHtmlOutput;
-        private IDictionary<HtmlFragment, string> _fragments;
-        
+        private Lazy<IEnumerable<IHtmlMediaOutput>> _htmlMediaOutputs;
+
         public override string DisplayName => "Dash document";
         public override MediaType Type => MediaType.Visual;
         public override IEnumerable<FileExtension> FileExtensions { get { yield return Dast.FileExtensions.Text.Dash; } }
 
-        public DashConverter()
-        {
-            _dashInput = new DashInput();
-            _fragmentedHtmlOutput = new FragmentedHtmlOutput();
-        }
-
         public override string Convert(string extension, string content, bool inline)
         {
+            var dashInput = new DashInput();
+            var fragmentedHtmlOutput = new FragmentedHtmlOutput();
+            fragmentedHtmlOutput.MediaCatalog.AddRange(_htmlMediaOutputs.Value);
+
             var htmlFragments = new []
             {
                 HtmlFragment.Body,
                 HtmlFragment.Notes
             };
 
-            _fragments = _fragmentedHtmlOutput.Convert(_dashInput.Convert(content), htmlFragments);
-            return $"<figure>{Environment.NewLine}{_fragments[HtmlFragment.Body]}{Environment.NewLine}{_fragments[HtmlFragment.Notes]}{Environment.NewLine}</figure>";
+            IDictionary<HtmlFragment, string> fragments = fragmentedHtmlOutput.Convert(dashInput.Convert(content), htmlFragments);
+            return $"<figure>{Environment.NewLine}{fragments[HtmlFragment.Body]}{Environment.NewLine}{fragments[HtmlFragment.Notes]}{Environment.NewLine}</figure>";
+        }
+
+        public ICollection<IHtmlMediaOutput> Extensions => _htmlMediaOutputs.Value.ToArray();
+        IEnumerable IExtensible.Extend(CompositionContext context) => Extend(context);
+
+        public IEnumerable<IHtmlMediaOutput> Extend(CompositionContext context)
+        {
+            _htmlMediaOutputs = new Lazy<IEnumerable<IHtmlMediaOutput>>(context.GetExports<IHtmlMediaOutput>);
+            return Enumerable.Empty<IHtmlMediaOutput>();
+        }
+
+        public void ResetToVanilla()
+        {
+            _htmlMediaOutputs = null;
         }
     }
 }
