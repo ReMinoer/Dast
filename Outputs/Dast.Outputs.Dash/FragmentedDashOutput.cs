@@ -185,7 +185,7 @@ namespace Dast.Outputs.Dash
 
         public override void VisitMedia(MediaNode node)
         {
-            WriteLine("<< .", node.Extension, " >>");
+            WriteLine("<< .", node.Extension, node.Type == null ? "" : (node.Type.Value == MediaType.Visual ? "+" : "-")," >>");
             WriteLine();
             WriteLine(node.Content);
             WriteLine();
