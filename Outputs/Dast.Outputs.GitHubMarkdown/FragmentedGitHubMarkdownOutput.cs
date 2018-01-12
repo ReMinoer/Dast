@@ -38,6 +38,9 @@ namespace Dast.Outputs.GitHubMarkdown
 
             foreach (IHtmlMediaOutput htmlMediaOutput in _htmlMediaOutputs.Extend(context))
             {
+                if (htmlMediaOutput is IExtensible extensible)
+                    extensible.Extend(context);
+
                 IMarkdownMediaOutput adapted = Adapt(htmlMediaOutput);
                 MediaCatalog.Add(adapted);
                 yield return adapted;
@@ -231,7 +234,7 @@ namespace Dast.Outputs.GitHubMarkdown
                     {
                         if (mediaConverter == null)
                         {
-                            mediaConverter = MediaOutputs.FirstOrDefault(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
+                            mediaConverter = MediaOutputs.FirstOrDefault(x => x.Type == MediaType.Visual && x.FileExtensions.Any(e => e.Match(node.Extension)));
                             if (mediaConverter == null)
                                 return;
                         }
