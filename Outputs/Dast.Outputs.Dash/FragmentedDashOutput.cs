@@ -135,7 +135,7 @@ namespace Dast.Outputs.Dash
         protected override void VisitNote(NoteNode node, int index)
         {
             CurrentStream = DashFragment.Notes;
-            Write("[", index.ToString(), "] ");
+            Write("@[", index.ToString(), "] ");
             Write(node.Line);
             CurrentStream = DashFragment.Body;
         }
