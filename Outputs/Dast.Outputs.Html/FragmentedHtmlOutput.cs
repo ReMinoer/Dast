@@ -61,9 +61,19 @@ namespace Dast.Outputs.Html
         public override void VisitListItem(ListItemNode node)
         {
             Write("<li>");
-            Write(node.Line);
+
+            if (node.Important)
+            {
+                Write("<b>");
+                Write(node.Line);
+                Write("</b>");
+            }
+            else
+                Write(node.Line);
+
             if (node.Sublist != null)
                 Write(node.Sublist);
+
             WriteLine("</li>");
         }
 

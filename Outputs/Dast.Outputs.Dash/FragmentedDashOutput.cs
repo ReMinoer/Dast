@@ -71,12 +71,16 @@ namespace Dast.Outputs.Dash
         public override void VisitList(ListNode node)
         {
             _listLevel++;
-            AggregateChildren(i => new string(' ', 4 * _listLevel) + (node.Ordered ? (i + 1).ToString() : "") + "- ", node);
+            AggregateChildren(i => new string(' ', 4 * _listLevel) + (node.Ordered ? (i + 1).ToString() : "") + "-", node);
             _listLevel--;
         }
 
         public override void VisitListItem(ListItemNode node)
         {
+            if (node.Important)
+                Write(">");
+
+            Write(" ");
             Write(node.Line);
             if (node.Sublist != null)
                 Write(node.Sublist);

@@ -86,7 +86,15 @@ namespace Dast.Outputs.GitHubMarkdown
 
         public override void VisitListItem(ListItemNode node)
         {
-            Write(node.Line);
+            if (node.Important)
+            {
+                Write("**");
+                Write(node.Line);
+                Write("**");
+            }
+            else
+                Write(node.Line);
+
             if (node.Sublist != null)
                 Write(node.Sublist);
         }

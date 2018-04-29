@@ -74,6 +74,7 @@ namespace Dast
     {
         public LineNode Line { get; set; }
         public ListNode Sublist { get; set; }
+        public bool Important { get; set; }
 
         public IEnumerable<IDocumentNode> Children
         {

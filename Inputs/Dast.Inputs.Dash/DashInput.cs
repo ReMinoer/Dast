@@ -247,35 +247,43 @@ namespace Dast.Inputs.Dash
 
         public override IDocumentNode VisitListBulleted(DashParser.ListBulletedContext context)
         {
-            return VisitListProcess(context.line(0), context.GetRules().Skip(1));
+            return VisitListProcess(context.listItem(0), context.GetRules().Skip(1));
         }
 
         public override IDocumentNode VisitListOrdered(DashParser.ListOrderedContext context)
         {
-            return VisitListProcess(context.line(0), context.GetRules().Skip(1), ordered: true);
+            return VisitListProcess(context.listItem(0), context.GetRules().Skip(1), ordered: true);
         }
 
         public override IDocumentNode VisitSublistBulleted(DashParser.SublistBulletedContext context)
         {
-            return VisitListProcess(context.line(0), context.GetRules().Skip(1));
+            return VisitListProcess(context.listItem(0), context.GetRules().Skip(1));
         }
 
         public override IDocumentNode VisitSublistOrdered(DashParser.SublistOrderedContext context)
         {
-            return VisitListProcess(context.line(0), context.GetRules().Skip(1), ordered: true);
+            return VisitListProcess(context.listItem(0), context.GetRules().Skip(1), ordered: true);
         }
 
-        private IDocumentNode VisitListProcess(DashParser.LineContext firstLine, IEnumerable<ParserRuleContext> others, bool ordered = false)
+        private IDocumentNode VisitListProcess(DashParser.ListItemContext firstItem, IEnumerable<ParserRuleContext> others, bool ordered = false)
         {
             var node = new ListNode { Ordered = ordered };
-            var lastItem = new ListItemNode { Line = (LineNode)firstLine.Accept(this) };
+            var lastItem = new ListItemNode
+            {
+                Line = (LineNode)firstItem.line().Accept(this),
+                Important = firstItem.important
+            };
             node.Children.Add(lastItem);
 
             foreach (ParserRuleContext rule in others)
             {
-                if (rule is DashParser.LineContext)
+                if (rule is DashParser.ListItemContext listItemContext)
                 {
-                    lastItem = new ListItemNode { Line = (LineNode)rule.Accept(this) };
+                    lastItem = new ListItemNode
+                    {
+                        Line = (LineNode)listItemContext.line().Accept(this),
+                        Important = listItemContext.important
+                    };
                     node.Children.Add(lastItem);
                 }
                 else
