@@ -201,7 +201,7 @@ namespace Dast.Outputs.Dash
             if (!string.IsNullOrEmpty(node.Extension))
                 Write("< .", node.Extension, ">");
 
-            Write("{ ", node.Content, " }");
+            Write("{", node.Content, "}");
         }
 
         public override void VisitComment(CommentNode node)
@@ -209,7 +209,7 @@ namespace Dast.Outputs.Dash
             if (node.Inline)
                 Write("~~ ");
             else
-                WriteLine("~~~~");
+                WriteLine("~~");
 
             Write(node.Content);
 
@@ -217,7 +217,7 @@ namespace Dast.Outputs.Dash
                 return;
 
             WriteLine();
-            WriteLine("~~~~");
+            WriteLine("~~");
         }
     }
 }

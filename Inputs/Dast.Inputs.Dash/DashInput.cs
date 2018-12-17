@@ -344,6 +344,7 @@ namespace Dast.Inputs.Dash
                 AdressNode = _adresses.FirstOrDefault(x => adress.Equals(x.Key, StringComparison.OrdinalIgnoreCase)).Value,
                 AdressByDefault = adress
             };
+
             if (internalLinkNode.AdressNode == null)
                 _unresolvedLinks.Add(internalLinkNode, adress);
 
@@ -404,7 +405,10 @@ namespace Dast.Inputs.Dash
 
             int? index = ((ValueNode<int?>)context.noteNumber().Accept(this)).Value;
             if (index == null)
-                _referenciesQueue.Dequeue().Note = node;
+            {
+                if (_referenciesQueue.Count > 0)
+                    _referenciesQueue.Dequeue().Note = node;
+            }
             else
                 foreach (ReferenceNode reference in _indexedReferencies[index.Value])
                     reference.Note = node;
@@ -421,9 +425,12 @@ namespace Dast.Inputs.Dash
         {
             var node = new NoteNode { Line = new LineNode { Children = { (LineNode.IChild)context.directLinkContent().Accept(this) } } };
 
-            int? index = ((ValueNode<int?>)context.noteNumber().Accept(this)).Value;
+            int? index = ((ValueNode<int?>)context.noteNumber()?.Accept(this))?.Value;
             if (index == null)
-                _referenciesQueue.Dequeue().Note = node;
+            {
+                if (_referenciesQueue.Count > 0)
+                    _referenciesQueue.Dequeue().Note = node;
+            }
             else
                 foreach (ReferenceNode reference in _indexedReferencies[index.Value])
                     reference.Note = node;
