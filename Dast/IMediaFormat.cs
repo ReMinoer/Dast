@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Dast
+﻿namespace Dast
 {
     public interface IMediaFormat : IFormat
     {
