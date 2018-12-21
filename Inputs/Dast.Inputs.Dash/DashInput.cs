@@ -403,7 +403,7 @@ namespace Dast.Inputs.Dash
         {
             var node = new NoteNode { Line = (LineNode)context.line().Accept(this) };
 
-            int? index = ((ValueNode<int?>)context.noteNumber().Accept(this)).Value;
+            int? index = ((ValueNode<int?>)context.noteNumber()?.Accept(this))?.Value;
             if (index == null)
             {
                 if (_referenciesQueue.Count > 0)
