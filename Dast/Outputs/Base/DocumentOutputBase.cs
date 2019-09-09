@@ -50,7 +50,7 @@ namespace Dast.Outputs.Base
         protected abstract void VisitNote(NoteNode node, int index);
         public abstract void VisitBold(BoldNode node);
         public abstract void VisitItalic(ItalicNode node);
-        public abstract void VisitMark(MarkNode node);
+        public abstract void VisitQuote(QuoteNode node);
         public abstract void VisitObsolete(ObsoleteNode node);
         public abstract void VisitEmphasis(EmphasisNode node);
         public abstract void VisitText(TextNode node);

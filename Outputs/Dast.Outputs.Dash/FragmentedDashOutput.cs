@@ -158,9 +158,9 @@ namespace Dast.Outputs.Dash
             Write("]");
         }
 
-        public override void VisitMark(MarkNode node)
+        public override void VisitQuote(QuoteNode node)
         {
-            Write("=[");
+            Write("\"[");
             JoinChildren(node, " ");
             Write("]");
         }

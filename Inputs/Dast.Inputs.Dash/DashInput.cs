@@ -459,9 +459,9 @@ namespace Dast.Inputs.Dash
             return node;
         }
 
-        public override IDocumentNode VisitMark(DashParser.MarkContext context)
+        public override IDocumentNode VisitQuote(DashParser.QuoteContext context)
         {
-            var node = new MarkNode();
+            var node = new QuoteNode();
             node.Children.AddRange(context.emphasisLine().Accept(this).Children.DumpCollectionNodes().Cast<LineNode.IChild>());
             return node;
         }

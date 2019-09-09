@@ -15,7 +15,7 @@ namespace Dast
         void VisitNote(NoteNode node);
         void VisitBold(BoldNode node);
         void VisitItalic(ItalicNode node);
-        void VisitMark(MarkNode node);
+        void VisitQuote(QuoteNode node);
         void VisitObsolete(ObsoleteNode node);
         void VisitEmphasis(EmphasisNode node);
         void VisitText(TextNode node);

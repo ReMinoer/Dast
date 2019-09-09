@@ -137,9 +137,9 @@ namespace Dast
         public override void Accept(IDocumentVisitor visitor) => visitor.VisitItalic(this);
     }
 
-    public class MarkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
+    public class QuoteNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        public override void Accept(IDocumentVisitor visitor) => visitor.VisitMark(this);
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitQuote(this);
     }
 
     public class ObsoleteNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild

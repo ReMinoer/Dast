@@ -132,11 +132,11 @@ namespace Dast.Outputs.Html
             Write("</em>");
         }
 
-        public override void VisitMark(MarkNode node)
+        public override void VisitQuote(QuoteNode node)
         {
-            Write("<mark>");
+            Write("<q>");
             JoinChildren(node, " ");
-            Write("</mark>");
+            Write("</q>");
         }
 
         public override void VisitObsolete(ObsoleteNode node)
