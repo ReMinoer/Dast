@@ -207,9 +207,9 @@ namespace Dast.Outputs.Dash
         public override void VisitComment(CommentNode node)
         {
             if (node.Inline)
-                Write("~~ ");
+                Write("## ");
             else
-                WriteLine("~~");
+                WriteLine("###");
 
             Write(node.Content);
 
@@ -217,7 +217,7 @@ namespace Dast.Outputs.Dash
                 return;
 
             WriteLine();
-            WriteLine("~~");
+            WriteLine("###");
         }
     }
 }
