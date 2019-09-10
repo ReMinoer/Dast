@@ -167,7 +167,7 @@ namespace Dast.Outputs.Dash
 
         public override void VisitObsolete(ObsoleteNode node)
         {
-            Write("~[");
+            Write("#[");
             JoinChildren(node, " ");
             Write("]");
         }
