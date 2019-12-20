@@ -95,23 +95,18 @@ namespace Dast
         public override void Accept(IDocumentVisitor visitor) => visitor.VisitLine(this);
     }
 
-    public class InternalLinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
+    public class LinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        public AdressNode AdressNode { get; set; }
-        public string AdressByDefault { get; set; }
-        public override void Accept(IDocumentVisitor visitor) => visitor.VisitInternalLink(this);
+        public AddressNode AddressNode { get; set; }
+        public string Address { get; set; }
+        public bool IsInternal => AddressNode != null;
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitLink(this);
     }
 
-    public class ExternalLinkNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
+    public class AddressNode : LeafNodeBase, LineNode.IChild
     {
-        public string Adress { get; set; }
-        public override void Accept(IDocumentVisitor visitor) => visitor.VisitExternalLink(this);
-    }
-
-    public class AdressNode : LeafNodeBase, LineNode.IChild
-    {
-        public List<string> Names { get; } = new List<string>();
-        public override void Accept(IDocumentVisitor visitor) => visitor.VisitAdress(this);
+        public string Id { get; set; }
+        public override void Accept(IDocumentVisitor visitor) => visitor.VisitAddress(this);
     }
 
     public class ReferenceNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild

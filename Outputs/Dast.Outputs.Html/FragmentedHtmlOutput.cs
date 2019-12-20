@@ -83,23 +83,21 @@ namespace Dast.Outputs.Html
             WriteLine();
         }
 
-        public override void VisitInternalLink(InternalLinkNode node)
+        public override void VisitLink(LinkNode node)
         {
-            Write("<a href=\"#", ToIdentifier(node.AdressNode?.Names[0] ?? node.AdressByDefault), "\">");
+            Write("<a href=\"");
+            if (node.IsInternal)
+                Write("#", ToIdentifier(node.AddressNode.Id));
+            else
+                Write(node.Address);
+            Write("\">");
             JoinChildren(node, " ");
             Write("</a>");
         }
 
-        public override void VisitExternalLink(ExternalLinkNode node)
+        public override void VisitAddress(AddressNode node)
         {
-            Write("<a href=\"", node.Adress, "\">");
-            JoinChildren(node, " ");
-            Write("</a>");
-        }
-
-        public override void VisitAdress(AdressNode node)
-        {
-            Write("<span id=\"", ToIdentifier(node.Names[0]), "\"></span>");
+            Write("<span id=\"", ToIdentifier(node.Id), "\"></span>");
         }
 
         protected override void VisitReference(ReferenceNode node, int index)

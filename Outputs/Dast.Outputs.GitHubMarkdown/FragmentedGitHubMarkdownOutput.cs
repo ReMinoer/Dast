@@ -105,41 +105,32 @@ namespace Dast.Outputs.GitHubMarkdown
             WriteLine();
         }
 
-        public override void VisitInternalLink(InternalLinkNode node)
+        public override void VisitLink(LinkNode node)
         {
-            string adress = node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "";
-
-            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode
-                && (node.AdressNode != null && node.AdressNode.Names.Any(x => x.EqualsOrdinal(textNode.Content))
-                || node.AdressByDefault.EqualsOrdinal(textNode.Content)))
+            string address = ToHtmlIdentifier(node.AddressNode?.Id) ?? node.Address ?? "";
+            
+            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && address.EqualsOrdinal(textNode.Content))
             {
-                Write("<#", ToHtmlIdentifier(adress), ">");
+                Write("<");
+                if (node.IsInternal)
+                    Write("#");
+                Write(address, ">");
             }
             else
             {
                 Write("[");
                 JoinChildren(node, " ");
-                Write("](#", adress, ")");
+                Write("]");
+                Write("(");
+                if (node.IsInternal)
+                    Write("#");
+                Write(address, ")");
             }
         }
 
-        public override void VisitExternalLink(ExternalLinkNode node)
+        public override void VisitAddress(AddressNode node)
         {
-            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && node.Adress.EqualsOrdinal(textNode.Content))
-            {
-                Write("<", node.Adress, ">");
-            }
-            else
-            {
-                Write("[");
-                JoinChildren(node, " ");
-                Write("](", node.Adress, ")");
-            }
-        }
-
-        public override void VisitAdress(AdressNode node)
-        {
-            Write($"<span id=\"{ ToHtmlIdentifier(node.Names[0]) }\"></span>");
+            Write($"<span id=\"{ ToHtmlIdentifier(node.Id) }\"></span>");
         }
 
         protected override void VisitReference(ReferenceNode node, int index)
@@ -265,6 +256,9 @@ namespace Dast.Outputs.GitHubMarkdown
 
         static public string ToHtmlIdentifier(string name)
         {
+            if (name == null)
+                return null;
+
             string result = "";
             bool upperNext = false;
 

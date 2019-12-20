@@ -92,54 +92,38 @@ namespace Dast.Outputs.Dash
             WriteLine();
         }
 
-        public override void VisitInternalLink(InternalLinkNode node)
+        public override void VisitLink(LinkNode node)
         {
-            string adress = node.AdressNode?.Names[0] ?? node.AdressByDefault ?? "";
+            string address = node.AddressNode?.Id ?? node.Address ?? "";
 
-            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode
-                && (node.AdressNode != null && node.AdressNode.Names.Any(x => x.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
-                || node.AdressByDefault.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase)))
+            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && address.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
             {
-                Write("[[", adress, "]]");
+                Write("[", address, "]>");
             }
             else
             {
                 Write("[");
                 JoinChildren(node, " ");
-                Write("][", adress, "]");
+                Write("](", address, ")>");
             }
         }
 
-        public override void VisitExternalLink(ExternalLinkNode node)
+        public override void VisitAddress(AddressNode node)
         {
-            if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && node.Adress.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
-            {
-                Write("[[", node.Adress, "]]");
-            }
-            else
-            {
-                Write("[");
-                JoinChildren(node, " ");
-                Write("][", node.Adress, "]");
-            }
-        }
-
-        public override void VisitAdress(AdressNode node)
-        {
-            Write("@[", string.Join("|", node.Names), "]");
+            Write("@(", node.Id, ")");
         }
 
         protected override void VisitReference(ReferenceNode node, int index)
         {
             Write("[");
             JoinChildren(node, " ");
-            Write("][", index.ToString(), "]");
+            Write("]", index.ToString(), "]");
         }
 
         protected override void VisitNote(NoteNode node, int index)
         {
             CurrentStream = DashFragment.Notes;
-            Write("@[", index.ToString(), "] ");
+            Write(index.ToString(), ": ");
             Write(node.Line);
             CurrentStream = DashFragment.Body;
         }

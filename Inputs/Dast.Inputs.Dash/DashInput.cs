@@ -9,7 +9,6 @@ using Antlr4.Runtime.Tree;
 using DashCSharp;
 using Dast.Extensibility;
 using Dast.Media.Contracts.Dash;
-using Dast.Outputs.Base;
 
 namespace Dast.Inputs.Dash
 {
@@ -21,11 +20,14 @@ namespace Dast.Inputs.Dash
 
         private string _paragraphMode;
         private int? _titleMode;
-
+        
+        private readonly Dictionary<int, List<LinkNode>> _indexedLinks = new Dictionary<int, List<LinkNode>>();
+        private readonly Queue<LinkNode> _linksQueue = new Queue<LinkNode>();
         private readonly Dictionary<int, List<ReferenceNode>> _indexedReferencies = new Dictionary<int, List<ReferenceNode>>();
         private readonly Queue<ReferenceNode> _referenciesQueue = new Queue<ReferenceNode>();
-        private readonly Dictionary<InternalLinkNode, string> _unresolvedLinks = new Dictionary<InternalLinkNode, string>();
-        private readonly Dictionary<string, AdressNode> _adresses = new Dictionary<string, AdressNode>();
+        
+        private readonly List<LinkNode> _unresolvedLinkAddresses = new List<LinkNode>();
+        private readonly Dictionary<string, AddressNode> _adresses = new Dictionary<string, AddressNode>(StringComparer.OrdinalIgnoreCase);
 
         public ExtensibleFormatCatalog<IDashMediaInput> MediaCatalog { get; } = new ExtensibleFormatCatalog<IDashMediaInput>();
         IEnumerable<IMediaInput> IDocumentInput.MediaInputs => MediaCatalog;
@@ -304,9 +306,56 @@ namespace Dast.Inputs.Dash
 
         public override IDocumentNode VisitLink(DashParser.LinkContext context)
         {
-            ParentNodeBase<LineNode.IChild> node = ResolveLink(((ValueNode<string>)context.linkContent().Accept(this)).Value);
-            node.Children.AddRange(context.linkLine().Accept(this).Children.DumpCollectionNodes().Cast<LineNode.IChild>());
+            string address = ((TextNode)context.linkAddress()?.Accept(this))?.Content;
+            LinkNode node = VisitLinkCore(context.linkLine(), address);
+
+            if (node.Address != null)
+                return node;
+
+            if (context.LINK_CLOSE() != null)
+            {
+                _linksQueue.Enqueue(node);
+            }
+            else
+            {
+                int index = GetIndex(context.LINK_CLOSE_NUMBER());
+                if (!_indexedLinks.TryGetValue(index, out List<LinkNode> linkList))
+                    _indexedLinks[index] = linkList = new List<LinkNode>();
+                linkList.Add(node);
+            }
+
             return node;
+        }
+
+        public override IDocumentNode VisitLinkAddress(DashParser.LinkAddressContext context)
+        {
+            return new TextNode { Content = context.GetText() };
+        }
+
+        public override IDocumentNode VisitDirectLink(DashParser.DirectLinkContext context)
+        {
+            DashParser.LinkLineContext lineContext = context.linkLine();
+            return VisitLinkCore(lineContext, lineContext.GetText());
+        }
+
+        private LinkNode VisitLinkCore(DashParser.LinkLineContext lineContext, string address)
+        {
+            var node = new LinkNode();
+            node.Children.AddRange(lineContext.Accept(this).Children.DumpCollectionNodes().Cast<LineNode.IChild>());
+
+            if (address != null)
+                AssignAdressToLink(node, address);
+
+            return node;
+        }
+
+        private void AssignAdressToLink(LinkNode node, string address)
+        {
+            node.Address = address;
+            if (_adresses.TryGetValue(node.Address, out AddressNode addressNode))
+                node.AddressNode = addressNode;
+            else
+                _unresolvedLinkAddresses.Add(node);
         }
 
         public override IDocumentNode VisitLinkLine(DashParser.LinkLineContext context)
@@ -316,56 +365,20 @@ namespace Dast.Inputs.Dash
             return node;
         }
 
-        public override IDocumentNode VisitLinkContent(DashParser.LinkContentContext context)
-        {
-            return new ValueNode<string>(context.GetText());
-        }
-
-        public override IDocumentNode VisitDirectLink(DashParser.DirectLinkContext context)
-        {
-            var textNode = (TextNode)context.directLinkContent().Accept(this);
-            ParentNodeBase<LineNode.IChild> node = ResolveLink(textNode.Content);
-            node.Children.Add(textNode);
-            return node;
-        }
-
-        public override IDocumentNode VisitDirectLinkContent(DashParser.DirectLinkContentContext context)
-        {
-            return new TextNode { Content = context.GetText() };
-        }
-
-        private ParentNodeBase<LineNode.IChild> ResolveLink(string adress)
-        {
-            if (adress.ContainsAny('.', '/', '\\'))
-                return new ExternalLinkNode { Adress = adress };
-
-            var internalLinkNode = new InternalLinkNode
-            {
-                AdressNode = _adresses.FirstOrDefault(x => adress.Equals(x.Key, StringComparison.OrdinalIgnoreCase)).Value,
-                AdressByDefault = adress
-            };
-
-            if (internalLinkNode.AdressNode == null)
-                _unresolvedLinks.Add(internalLinkNode, adress);
-
-            return internalLinkNode;
-        }
-
         public override IDocumentNode VisitAddress(DashParser.AddressContext context)
         {
-            var node = new AdressNode();
-            node.Names.AddRange(context.addressContent().Select(x => x.Accept(this)).Cast<ValueNode<string>>().Select(x => x.Value));
-
-            foreach (string name in node.Names)
+            var node = new AddressNode
             {
-                _adresses[name] = node;
+                Id = ((ValueNode<string>)context.addressContent().Accept(this)).Value
+            };
 
-                InternalLinkNode[] links = _unresolvedLinks.Where(x => name.Equals(x.Value, StringComparison.OrdinalIgnoreCase)).Select(x => x.Key).ToArray();
-                foreach (InternalLinkNode link in links)
-                {
-                    link.AdressNode = node;
-                    _unresolvedLinks.Remove(link);
-                }
+            _adresses[node.Id] = node;
+            
+            LinkNode[] linksToResolve = _unresolvedLinkAddresses.Where(x => node.Id.Equals(x.Address, StringComparison.OrdinalIgnoreCase)).ToArray();
+            foreach (LinkNode link in linksToResolve)
+            {
+                link.AddressNode = node;
+                _unresolvedLinkAddresses.Remove(link);
             }
 
             return node;
@@ -381,61 +394,65 @@ namespace Dast.Inputs.Dash
             var node = new ReferenceNode();
             node.Children.AddRange(context.linkLine().Accept(this).Children.DumpCollectionNodes().Cast<LineNode.IChild>());
 
-            int? index = ((ValueNode<int?>)context.referenceNumber().Accept(this)).Value;
-            if (index == null)
+            // Handle inline notes
+            if (context.REFERENCE_CLOSE() != null)
+            {
                 _referenciesQueue.Enqueue(node);
+            }
             else
             {
-                if (!_indexedReferencies.TryGetValue(index.Value, out List<ReferenceNode> list))
-                    _indexedReferencies[index.Value] = list = new List<ReferenceNode>();
-                list.Add(node);
+                int index = GetIndex(context.REFERENCE_CLOSE_NUMBER());
+                if (!_indexedReferencies.TryGetValue(index, out List<ReferenceNode> referenceList))
+                    _indexedReferencies[index] = referenceList = new List<ReferenceNode>();
+                referenceList.Add(node);
             }
 
             return node;
         }
 
-        public override IDocumentNode VisitReferenceNumber(DashParser.ReferenceNumberContext context)
+        public override IDocumentNode VisitAdressEntry(DashParser.AdressEntryContext context)
         {
-            return new ValueNode<int?>(int.TryParse(context.GetText(), out int number) ? (int?)number : null);
+            var node = new ValueNode<string>(context.line().GetText());
+
+            string address = node.Value;
+            if (context.ADDRESS_ENTRY() != null)
+            {
+                if (_linksQueue.Count > 0)
+                    AssignAdressToLink(_linksQueue.Dequeue(), address);
+            }
+            else
+            {
+                int index = GetIndex(context.ADDRESS_ENTRY_NUMBER());
+                if (_indexedLinks.TryGetValue(index, out List<LinkNode> links))
+                    foreach (LinkNode link in links)
+                        AssignAdressToLink(link, address);
+            }
+
+            return null;
         }
 
-        public override IDocumentNode VisitNote(DashParser.NoteContext context)
+        public override IDocumentNode VisitNoteEntry(DashParser.NoteEntryContext context)
         {
             var node = new NoteNode { Line = (LineNode)context.line().Accept(this) };
-
-            int? index = ((ValueNode<int?>)context.noteNumber()?.Accept(this))?.Value;
-            if (index == null)
+            
+            if (context.NOTE_ENTRY() != null)
             {
                 if (_referenciesQueue.Count > 0)
                     _referenciesQueue.Dequeue().Note = node;
             }
             else
-                foreach (ReferenceNode reference in _indexedReferencies[index.Value])
-                    reference.Note = node;
-
-            return node;
-        }
-
-        public override IDocumentNode VisitNoteNumber(DashParser.NoteNumberContext context)
-        {
-            return new ValueNode<int?>(int.TryParse(context.GetText(), out int number) ? (int?)number : null);
-        }
-
-        public override IDocumentNode VisitRedirection(DashParser.RedirectionContext context)
-        {
-            var node = new NoteNode { Line = new LineNode { Children = { (LineNode.IChild)context.directLinkContent().Accept(this) } } };
-
-            int? index = ((ValueNode<int?>)context.noteNumber()?.Accept(this))?.Value;
-            if (index == null)
             {
-                if (_referenciesQueue.Count > 0)
-                    _referenciesQueue.Dequeue().Note = node;
-            }
-            else
-                foreach (ReferenceNode reference in _indexedReferencies[index.Value])
+                int index = GetIndex(context.NOTE_ENTRY_NUMBER());
+                foreach (ReferenceNode reference in _indexedReferencies[index])
                     reference.Note = node;
+            }
 
             return node;
+        }
+
+        private int GetIndex(IParseTree token)
+        {
+            return int.Parse(new string(token.GetText().ToCharArray().Where(char.IsNumber).ToArray()));
         }
 
         public override IDocumentNode VisitEmphasisLine(DashParser.EmphasisLineContext context)

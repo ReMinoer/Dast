@@ -43,9 +43,8 @@ namespace Dast.Outputs.Base
         public abstract void VisitList(ListNode node);
         public abstract void VisitListItem(ListItemNode node);
         public abstract void VisitLine(LineNode node);
-        public abstract void VisitInternalLink(InternalLinkNode node);
-        public abstract void VisitExternalLink(ExternalLinkNode node);
-        public abstract void VisitAdress(AdressNode node);
+        public abstract void VisitLink(LinkNode node);
+        public abstract void VisitAddress(AddressNode node);
         protected abstract void VisitReference(ReferenceNode node, int index);
         protected abstract void VisitNote(NoteNode node, int index);
         public abstract void VisitBold(BoldNode node);

@@ -8,9 +8,8 @@ namespace Dast
         void VisitList(ListNode node);
         void VisitListItem(ListItemNode node);
         void VisitLine(LineNode node);
-        void VisitInternalLink(InternalLinkNode node);
-        void VisitExternalLink(ExternalLinkNode node);
-        void VisitAdress(AdressNode node);
+        void VisitLink(LinkNode node);
+        void VisitAddress(AddressNode node);
         void VisitReference(ReferenceNode node);
         void VisitNote(NoteNode node);
         void VisitBold(BoldNode node);
