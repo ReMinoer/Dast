@@ -306,7 +306,7 @@ namespace Dast.Inputs.Dash
 
         public override IDocumentNode VisitLink(DashParser.LinkContext context)
         {
-            string address = ((TextNode)context.linkAddress()?.Accept(this))?.Content;
+            string address = ((TextNode)context.parameter()?.Accept(this))?.Content;
             LinkNode node = VisitLinkCore(context.linkLine(), address);
 
             if (node.Address != null)
@@ -327,7 +327,7 @@ namespace Dast.Inputs.Dash
             return node;
         }
 
-        public override IDocumentNode VisitLinkAddress(DashParser.LinkAddressContext context)
+        public override IDocumentNode VisitParameter(DashParser.ParameterContext context)
         {
             return new TextNode { Content = context.GetText() };
         }
@@ -391,10 +391,17 @@ namespace Dast.Inputs.Dash
 
         public override IDocumentNode VisitReference(DashParser.ReferenceContext context)
         {
+            string note = ((TextNode)context.parameter()?.Accept(this))?.Content;
+
             var node = new ReferenceNode();
             node.Children.AddRange(context.linkLine().Accept(this).Children.DumpCollectionNodes().Cast<LineNode.IChild>());
 
-            // Handle inline notes
+            if (note != null)
+            {
+                node.Note = note;
+                return node;
+            }
+            
             if (context.REFERENCE_CLOSE() != null)
             {
                 _referenciesQueue.Enqueue(node);
@@ -438,13 +445,13 @@ namespace Dast.Inputs.Dash
             if (context.NOTE_ENTRY() != null)
             {
                 if (_referenciesQueue.Count > 0)
-                    _referenciesQueue.Dequeue().Note = node;
+                    _referenciesQueue.Dequeue().NoteNode = node;
             }
             else
             {
                 int index = GetIndex(context.NOTE_ENTRY_NUMBER());
                 foreach (ReferenceNode reference in _indexedReferencies[index])
-                    reference.Note = node;
+                    reference.NoteNode = node;
             }
 
             return node;

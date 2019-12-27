@@ -111,7 +111,9 @@ namespace Dast
 
     public class ReferenceNode : ParentNodeBase<LineNode.IChild>, LineNode.IChild
     {
-        public NoteNode Note { get; set; }
+        public NoteNode NoteNode { get; set; }
+        public string Note { get; set; }
+        public bool IsInlined => NoteNode == null;
         public override void Accept(IDocumentVisitor visitor) => visitor.VisitReference(this);
     }
 

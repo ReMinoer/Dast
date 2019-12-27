@@ -102,9 +102,18 @@ namespace Dast.Outputs.Html
 
         protected override void VisitReference(ReferenceNode node, int index)
         {
-            Write("<span class=\"dast-reference\">");
-            JoinChildren(node, " ");
-            Write("<sup><a href=\"#dast-note-", index.ToString(), "\">", index.ToString(), "</a></sup></span>");
+            if (node.IsInlined)
+            {
+                Write($"<abbr class=\"dast-reference\" title=\"{node.Note}\">");
+                JoinChildren(node, " ");
+                Write("</abbr>");
+            }
+            else
+            {
+                Write("<span class=\"dast-reference\">");
+                JoinChildren(node, " ");
+                Write("<sup><a href=\"#dast-note-", index.ToString(), "\">", index.ToString(), "</a></sup></span>");
+            }
         }
 
         protected override void VisitNote(NoteNode node, int index)

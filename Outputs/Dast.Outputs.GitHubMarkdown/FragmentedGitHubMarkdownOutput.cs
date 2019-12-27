@@ -135,16 +135,25 @@ namespace Dast.Outputs.GitHubMarkdown
 
         protected override void VisitReference(ReferenceNode node, int index)
         {
-            Write("<span class=\"dast-reference\">");
-            JoinChildren(node, " ");
-            Write($"<sup><a href=\"#dast-note-{ index }\">{ index }</a></sup></span>");
+            if (node.IsInlined)
+            {
+                Write("<abbr class=\"dast-reference\" title=\"", node.Note, "\">");
+                JoinChildren(node, " ");
+                Write("</abbr>");
+            }
+            else
+            {
+                Write("<span class=\"dast-reference\">");
+                JoinChildren(node, " ");
+                Write("<sup><a href=\"#dast-note-", index.ToString(), "\">", index.ToString(), "</a></sup></span>");
+            }
         }
 
         protected override void VisitNote(NoteNode node, int index)
         {
             CurrentStream = GithubMarkdownFragment.Notes;
-            Write($"<p class=\"dast-note\" id=\"dast-note-{ index }\">{ index }. ");
-            Write(node.Line);
+            Write("<p class=\"dast-note\" id=\"dast-note-", index.ToString(), "}\">", index.ToString(), ". ");
+            JoinChildren(node, " ");
             WriteLine("</p>");
             CurrentStream = GithubMarkdownFragment.Body;
         }

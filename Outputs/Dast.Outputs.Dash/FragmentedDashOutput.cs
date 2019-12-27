@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dast.Extensibility.Outputs;
 using Dast.Media.Contracts.Dash;
 using Dast.Outputs.Base;
@@ -98,7 +97,7 @@ namespace Dast.Outputs.Dash
 
             if (node.Children.Count == 1 && node.Children[0] is TextNode textNode && address.Equals(textNode.Content, StringComparison.OrdinalIgnoreCase))
             {
-                Write("[", address, "]>");
+                Write("[", address, "]>>");
             }
             else
             {
@@ -115,9 +114,18 @@ namespace Dast.Outputs.Dash
 
         protected override void VisitReference(ReferenceNode node, int index)
         {
-            Write("[");
-            JoinChildren(node, " ");
-            Write("]", index.ToString(), "]");
+            if (node.IsInlined)
+            {
+                Write("[");
+                JoinChildren(node, " ");
+                Write("](", node.Note, ")*");
+            }
+            else
+            {
+                Write("[");
+                JoinChildren(node, " ");
+                Write("]", index.ToString()); 
+            }
         }
 
         protected override void VisitNote(NoteNode node, int index)

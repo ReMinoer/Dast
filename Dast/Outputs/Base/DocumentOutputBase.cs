@@ -20,14 +20,18 @@ namespace Dast.Outputs.Base
 
         public void VisitReference(ReferenceNode node)
         {
-            int index = _notes.IndexOf(node.Note);
-            if (index == -1)
+            int index = -1;
+            if (!node.IsInlined)
             {
-                _notes.Add(node.Note);
-                index = _notes.Count;
+                index = _notes.IndexOf(node.NoteNode);
+                if (index == -1)
+                {
+                    _notes.Add(node.NoteNode);
+                    index = _notes.Count;
+                }
+                else
+                    index++;
             }
-            else
-                index++;
 
             VisitReference(node, index);
         }
