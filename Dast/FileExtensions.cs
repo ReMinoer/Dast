@@ -24,6 +24,11 @@
             static public FileExtension YouTube => new FileExtension("Youtube", "youtube.com");
         }
 
+        static public class Music
+        {
+            static public FileExtension Abc => new FileExtension("ABC", "abc");
+        }
+
         static public class Programming
         {
             static public FileExtension Html => new FileExtension("HTML", "html", "htm", "xhtml", "xht");
