@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Dast.Media.Contracts.Html
 {
@@ -14,6 +15,13 @@ namespace Dast.Media.Contracts.Html
         public virtual string MandatoryCss => null;
         public virtual string RecommandedCss => null;
 
+        public virtual async Task GetResourceFilesAsync(string outputDirectory) {}
         public abstract string Convert(string extension, string content, bool inline);
+
+        public virtual string Convert(string extension, string content, bool inline, out IHtmlMediaOutput[] usedMediaOutputs)
+        {
+            usedMediaOutputs = null;
+            return Convert(extension, content, inline);
+        }
     }
 }

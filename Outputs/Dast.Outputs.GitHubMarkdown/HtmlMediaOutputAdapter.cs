@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dast.Media.Contracts.Html;
 using Dast.Media.Contracts.Markdown;
 
@@ -21,5 +22,7 @@ namespace Dast.Outputs.GitHubMarkdown
         {
             return _htmlMediaOutput.Convert(extension, content, inline);
         }
+
+        public async Task GetResourceFilesAsync(string outputDirectory) { }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Dast.Media.Contracts.Markdown;
 
 namespace Dast.Media.Markdown.Core
@@ -23,5 +24,6 @@ namespace Dast.Media.Markdown.Core
         }
 
         public string Convert(string extension, string content, bool inline) => $"![{Path.GetFileNameWithoutExtension(content)}]({content})";
+        public async Task GetResourceFilesAsync(string outputDirectory) {}
     }
 }

@@ -19,8 +19,6 @@ namespace Dast.Outputs.Html
             }
         }
 
-        private readonly HashSet<IHtmlMediaOutput> _usedMediaConverters = new HashSet<IHtmlMediaOutput>();
-
         public override void VisitDocument(DocumentNode node)
         {
             CurrentStream = HtmlFragment.Title;
@@ -180,68 +178,78 @@ namespace Dast.Outputs.Html
 
         private void VisitMediaBase(MediaNodeBase node, bool inline)
         {
-            IEnumerable<IHtmlMediaOutput> compatibtleConverters = MediaOutputs.Where(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
+            IEnumerable<IHtmlMediaOutput> compatibleConverters = MediaOutputs.Where(x => x.FileExtensions.Any(e => e.Match(node.Extension)));
 
             IHtmlMediaOutput mediaConverter;
             if (node.Type.HasValue)
-                mediaConverter = compatibtleConverters.FirstOrDefault(x => x.Type == node.Type.Value);
+                mediaConverter = compatibleConverters.FirstOrDefault(x => x.Type == node.Type.Value);
             else
-                mediaConverter = compatibtleConverters.FirstOrDefault();
+                mediaConverter = compatibleConverters.FirstOrDefault();
 
-            if (mediaConverter == null)
+            if (mediaConverter != null)
             {
-                if (node.Type == null || node.Type.Value == MediaType.Code)
-                {
-                    if (!inline)
-                    {
-                        WriteLine("<figure>");
-                        Write("<pre>");
-                    }
-                    Write("<code>", node.Content, "</code>");
-                    if (!inline)
-                    {
-                        WriteLine("</pre>");
-                        Write("</figure>");
-                    }
-                }
+                RegisterUsedMediaConverter(mediaConverter);
+                Write(mediaConverter.Convert(node.Extension, node.Content, inline, out IHtmlMediaOutput[] usedMediaOutputs));
+
+                if (usedMediaOutputs != null)
+                    foreach (IHtmlMediaOutput mediaOutput in usedMediaOutputs)
+                        RegisterUsedMediaConverter(mediaOutput);
 
                 return;
             }
 
-            if (_usedMediaConverters.Add(mediaConverter))
+            if (node.Type != null && node.Type.Value != MediaType.Code)
+                return;
+
+            if (!inline)
             {
-                if (!string.IsNullOrEmpty(mediaConverter.Head))
-                {
-                    CurrentStream = HtmlFragment.Head;
-
-                    WriteLine("<!-- ", mediaConverter.DisplayName, " -->");
-                    WriteLine(mediaConverter.Head);
-                }
-
-                if (!string.IsNullOrEmpty(mediaConverter.MandatoryCss) || mediaConverter.UseRecommandedCss && !string.IsNullOrEmpty(mediaConverter.RecommandedCss))
-                {
-                    CurrentStream = HtmlFragment.Css;
-
-                    WriteLine("/* ", mediaConverter.DisplayName, " */");
-
-                    if (!string.IsNullOrEmpty(mediaConverter.MandatoryCss))
-                        WriteLine(mediaConverter.MandatoryCss);
-                    if (mediaConverter.UseRecommandedCss && !string.IsNullOrEmpty(mediaConverter.RecommandedCss))
-                        WriteLine(mediaConverter.RecommandedCss);
-                }
-
-                if (!string.IsNullOrEmpty(mediaConverter.EndOfPage))
-                {
-                    CurrentStream = HtmlFragment.EndOfPage;
-
-                    WriteLine("<!-- ", mediaConverter.DisplayName, " -->");
-                    WriteLine(mediaConverter.EndOfPage);
-                }
-
-                CurrentStream = HtmlFragment.Body;
+                WriteLine("<figure>");
+                Write("<pre>");
             }
 
-            Write(mediaConverter.Convert(node.Extension, node.Content, inline));
+            Write("<code>", node.Content, "</code>");
+            if (!inline)
+            {
+                WriteLine("</pre>");
+                Write("</figure>");
+            }
+        }
+
+        protected override bool RegisterUsedMediaConverter(IHtmlMediaOutput mediaConverter)
+        {
+            if (!base.RegisterUsedMediaConverter(mediaConverter))
+                return false;
+
+            if (!string.IsNullOrEmpty(mediaConverter.Head))
+            {
+                CurrentStream = HtmlFragment.Head;
+
+                WriteLine("<!-- ", mediaConverter.DisplayName, " -->");
+                WriteLine(mediaConverter.Head);
+            }
+
+            if (!string.IsNullOrEmpty(mediaConverter.MandatoryCss) || mediaConverter.UseRecommandedCss && !string.IsNullOrEmpty(mediaConverter.RecommandedCss))
+            {
+                CurrentStream = HtmlFragment.Css;
+
+                WriteLine("/* ", mediaConverter.DisplayName, " */");
+
+                if (!string.IsNullOrEmpty(mediaConverter.MandatoryCss))
+                    WriteLine(mediaConverter.MandatoryCss);
+                if (mediaConverter.UseRecommandedCss && !string.IsNullOrEmpty(mediaConverter.RecommandedCss))
+                    WriteLine(mediaConverter.RecommandedCss);
+            }
+
+            if (!string.IsNullOrEmpty(mediaConverter.EndOfPage))
+            {
+                CurrentStream = HtmlFragment.EndOfPage;
+
+                WriteLine("<!-- ", mediaConverter.DisplayName, " -->");
+                WriteLine(mediaConverter.EndOfPage);
+            }
+
+            CurrentStream = HtmlFragment.Body;
+            return true;
         }
 
         public override void VisitComment(CommentNode node)

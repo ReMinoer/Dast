@@ -66,43 +66,17 @@ namespace Dast.Console
                 return false;
             }
 
-            string inputExtension = file.Extension.TrimStart('.');
-
-            var converter = new DastTextConverter();
+            var converter = new DastFileConverter();
             ExtensionsLoader.FromAssemblies(GetAssemblies(), converter);
             
             Stopwatch stopWatch = Stopwatch.StartNew();
-            
-            using (FileStream inputStream = file.OpenRead())
-            {
-                Dictionary<string, Stream> outputStreams = outputExtensions
-                    .ToDictionary<string, string, Stream>(x => x, x => SafeFileCreate(Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, x))));
 
-                converter.Convert(inputExtension, inputStream, outputStreams);
-
-                foreach (Stream outputStream in outputStreams.Values)
-                    outputStream.Dispose();
-            }
-
-            //foreach ((string extension, string result) output in converter.Convert(inputExtension, File.ReadAllText(rootedFilePath), outputExtensions).Zip(outputExtensions, (o, e) => (e, o.result)))
-            //    File.WriteAllText(Path.Combine(workingDirectory, Path.ChangeExtension(file.Name, output.extension)), output.result);
+            converter.Convert(rootedFilePath, workingDirectory, outputExtensions);
 
             stopWatch.Stop();
             System.Console.WriteLine(stopWatch.Elapsed.TotalSeconds);
 
             return true;
-        }
-
-        static private FileStream SafeFileCreate(string path)
-        {
-            try
-            {
-                return File.Create(path);
-            }
-            catch (IOException)
-            {
-                return File.Create(path);
-            }
         }
 
         static private IEnumerable<Assembly> GetAssemblies()

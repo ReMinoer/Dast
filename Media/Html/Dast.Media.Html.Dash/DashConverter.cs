@@ -18,19 +18,22 @@ namespace Dast.Media.Html.Dash
         public override MediaType Type => MediaType.Visual;
         public override IEnumerable<FileExtension> FileExtensions { get { yield return Dast.FileExtensions.Text.Dash; } }
 
-        public override string Convert(string extension, string content, bool inline)
+        public override string Convert(string extension, string content, bool inline) => Convert(extension, content, inline, out _);
+        public override string Convert(string extension, string content, bool inline, out IHtmlMediaOutput[] usedMediaOutputs)
         {
             var dashInput = new DashInput();
             var fragmentedHtmlOutput = new FragmentedHtmlOutput();
             fragmentedHtmlOutput.MediaCatalog.AddRange(_htmlMediaOutputs.Value);
 
-            var htmlFragments = new []
+            var htmlFragments = new[]
             {
                 HtmlFragment.Body,
                 HtmlFragment.Notes
             };
 
             IDictionary<HtmlFragment, string> fragments = fragmentedHtmlOutput.Convert(dashInput.Convert(content), htmlFragments);
+
+            usedMediaOutputs = fragmentedHtmlOutput.UsedMediaConverters.ToArray();
             return $"<figure>{Environment.NewLine}{fragments[HtmlFragment.Body]}{Environment.NewLine}{fragments[HtmlFragment.Notes]}{Environment.NewLine}</figure>";
         }
 

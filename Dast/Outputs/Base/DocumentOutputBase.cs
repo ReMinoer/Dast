@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dast.Outputs.Base
 {
@@ -17,6 +19,24 @@ namespace Dast.Outputs.Base
         IEnumerable<IMediaOutput> IDocumentOutput.MediaOutputs => MediaOutputs.Cast<IMediaOutput>();
 
         public abstract TOutput Convert(IDocumentNode node);
+
+        private readonly Dictionary<Type, TMedia> _usedMediaConverters = new Dictionary<Type, TMedia>();
+        public IEnumerable<TMedia> UsedMediaConverters => _usedMediaConverters.Values;
+
+        protected virtual bool RegisterUsedMediaConverter(TMedia usedMediaConverter)
+        {
+            var converterType = usedMediaConverter.GetType();
+            if (_usedMediaConverters.ContainsKey(converterType))
+                return false;
+
+            _usedMediaConverters.Add(converterType, usedMediaConverter);
+            return true;
+        }
+
+        public virtual async Task GetResourceFilesAsync(string outputDirectory)
+        {
+            await Task.WhenAll(_usedMediaConverters.Values.Select(x => x.GetResourceFilesAsync(outputDirectory)));
+        }
 
         public void VisitReference(ReferenceNode node)
         {

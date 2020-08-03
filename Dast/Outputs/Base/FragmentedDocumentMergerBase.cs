@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dast.Outputs.Base
 {
@@ -60,6 +61,8 @@ namespace Dast.Outputs.Base
                 _writer = null;
             }
         }
+
+        public Task GetResourceFilesAsync(string outputDirectory) => DocumentMultiWriter.GetResourceFilesAsync(outputDirectory);
 
         public bool IsUsingConditional()
         {
